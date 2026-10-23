@@ -1,0 +1,5 @@
+# Configuração mínima para a CLI do Supabase (supabase link / db push / functions deploy).
+project_id = "treino-em-casa"
+
+[functions.admin-users]
+verify_jwt = false
