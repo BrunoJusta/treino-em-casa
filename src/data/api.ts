@@ -73,6 +73,8 @@ export interface DataApi {
   saveBodyProfile(p: BodyProfile): Promise<void>
   addBodyMetric(date: string, weight_kg: number): Promise<void>
   deleteBodyMetric(id: string): Promise<void>
+  // backoffice: apaga a atividade de todos (treinos, fotos, dias, jarro, registo)
+  resetActivity(includeBody: boolean): Promise<void>
   // manutenção (no Supabase corre no servidor com pg_cron; no demo corre ao abrir)
   runMaintenance(today: string): Promise<void>
 }

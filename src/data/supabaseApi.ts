@@ -260,6 +260,18 @@ export function createSupabaseApi(url: string, anon: string): DataApi {
     async deleteBodyMetric(id) {
       must(await sb.from('body_metrics').delete().eq('id', id))
     },
+    async resetActivity(includeBody) {
+      // primeiro as fotos (o Storage só se apaga pela API), depois as tabelas
+      const people = (must(await sb.from('profiles').select('id')) ?? []) as { id: string }[]
+      for (const p of people) {
+        const files = await sb.storage.from('photos').list(p.id, { limit: 1000 })
+        const paths = (files.data ?? []).map((f) => `${p.id}/${f.name}`)
+        if (paths.length) await sb.storage.from('photos').remove(paths)
+      }
+      must(await sb.rpc('reset_activity', { p_include_body: includeBody }))
+      await idbSet(QUEUE_KEY, [])
+      try { localStorage.removeItem(CACHE_KEY) } catch { /* nada */ }
+    },
     async runMaintenance() {
       // No Supabase a manutenção corre no servidor (pg_cron, de hora a hora).
       // Aqui só o admin apaga as fotos com mais de 90 dias, porque o Storage só se apaga pela API.

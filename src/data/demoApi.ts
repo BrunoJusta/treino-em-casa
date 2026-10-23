@@ -294,6 +294,23 @@ export const demoApi: DataApi = {
     const { metrics } = await this.getBody()
     safeSet(bodyKey('metrics'), JSON.stringify(metrics.filter((m) => m.id !== id)))
   },
+  async resetActivity(includeBody) {
+    requireAdmin()
+    const s = load()
+    for (const x of s.sessions) if (x.photo_path && !x.photo_path.startsWith('demo:')) await idbDel(`photo:${x.photo_path}`)
+    mutate((snap) => {
+      snap.sessions = []
+      snap.plannedDays = []
+      snap.excuses = []
+      snap.jar = []
+      snap.reactions = []
+      snap.closures = []
+      snap.audit = []
+    }, { action: 'reset.activity', entity: 'all', detail: includeBody ? 'Dados repostos (incluindo peso e IMC)' : 'Dados repostos' })
+    if (includeBody) {
+      try { Object.keys(localStorage).filter((k) => k.startsWith('tec-demo-body')).forEach((k) => localStorage.setItem(k, k.endsWith('metrics') ? '[]' : 'null')) } catch { /* nada */ }
+    }
+  },
   async runMaintenance(today) {
     const before = load()
     const after = runMaintenanceOn(before, today, uid, now())

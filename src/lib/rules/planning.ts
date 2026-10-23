@@ -69,7 +69,7 @@ export interface Ctx {
 
 /** Pode tirar-se um dia? Só dias de hoje em diante, ainda sem treino, e sem deixar a semana abaixo do mínimo. */
 export function canUnmark(pd: PlannedDay, ctx: Ctx): { ok: boolean; reason?: string } {
-  if (cmp(pd.date, ctx.today) < 0) return { ok: false, reason: 'Os dias que já passaram não se tiram. Podes mudá-los para outro dia.' }
+  if (cmp(pd.date, ctx.today) < 0) return { ok: false, reason: 'Os dias que já passaram não se eliminam. Podes mudá-los para outro dia deste mês.' }
   const st = dayState(pd, ctx.today, ctx.sessions, ctx.excuses, ctx.closedMonths)
   if (st === 'done') return { ok: false, reason: 'Este dia já tem treino feito.' }
   if (st === 'pending' || st === 'excused') return { ok: false, reason: 'Este dia tem uma desculpa.' }
@@ -77,7 +77,7 @@ export function canUnmark(pd: PlannedDay, ctx: Ctx): { ok: boolean; reason?: str
   const marked = ctx.days.filter((d) => monthKey(d.date) === mk && d.id !== pd.id).map((d) => d.date)
   const wk = checkMonthWeeks(mk, marked, ctx.minPerWeek).find((w) => w.start === weekStart(pd.date))
   if (wk && !wk.ok) {
-    return { ok: false, reason: `Esta semana precisa de pelo menos ${wk.required} ${wk.required === 1 ? 'dia' : 'dias'}. Em vez de tirar, muda o dia.` }
+    return { ok: false, reason: `Esta semana precisa de pelo menos ${wk.required} ${wk.required === 1 ? 'dia' : 'dias'}. Em vez de eliminar, muda-o para outro dia.` }
   }
   return { ok: true }
 }

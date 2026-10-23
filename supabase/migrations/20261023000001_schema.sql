@@ -221,8 +221,8 @@ declare closed boolean;
 begin
   if public.is_system() then return coalesce(new, old); end if;
   if tg_op = 'DELETE' then
-    if old.date < public.today_lisbon() and not public.is_admin() then raise exception 'Os dias que já passaram não se tiram.'; end if;
-    if old.status <> 'planned' and not public.is_admin() then raise exception 'Este dia já não se pode tirar.'; end if;
+    if old.date < public.today_lisbon() and not public.is_admin() then raise exception 'Os dias que já passaram não se eliminam.'; end if;
+    if old.status <> 'planned' and not public.is_admin() then raise exception 'Este dia já não se pode eliminar.'; end if;
     return old;
   end if;
   if tg_op = 'INSERT' then

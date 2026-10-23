@@ -39,7 +39,7 @@ npx supabase link --project-ref <project-ref>
 npx supabase db push
 ```
 
-Isto corre as três migrações de `supabase/migrations`:
+Isto corre as migrações de `supabase/migrations` (esquema, lógica, seed, cabo de baixo e repor dados):
 
 1. `..._schema.sql`: tabelas, RLS e proteções (triggers).
 2. `..._logic.sql`: desculpas, jarro, fecho do mês, preenchimento automático, buckets `photos` (privado) e `avatars` (público), e o agendamento de hora a hora com `pg_cron`.

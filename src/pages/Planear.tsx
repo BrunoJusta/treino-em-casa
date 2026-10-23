@@ -5,12 +5,12 @@ import { api } from '../lib/config'
 import { BackHeader } from '../components/ui'
 import { DayActions, STATE_LABEL } from '../components/DayActions'
 import { cmp, dayOfMonth, longDate, monthDays, monthKey, monthLabel, monthName, nextMonth, prevMonth, WEEKDAY_ABBR, WEEKDAY_SHORT, weekday } from '../lib/dates'
-import { checkMonthWeeks, monthRequirement, repeatPattern } from '../lib/rules/planning'
+import { canUnmark, checkMonthWeeks, monthRequirement, repeatPattern } from '../lib/rules/planning'
 import { sfx, vibrate } from '../lib/fx'
 import type { PlannedDay } from '../data/types'
 
 export function Planear() {
-  const { snap, me, today, run, stateOf } = useApp()
+  const { snap, me, today, run, stateOf, closedMonths } = useApp()
   const cur = monthKey(today)
   const [mk, setMk] = useState(cur)
   const [open, setOpen] = useState<PlannedDay | null>(null)
@@ -28,7 +28,14 @@ export function Planear() {
     sfx.tap()
     vibrate(10)
     const ex = monthMine.find((x) => x.date === d)
-    if (ex) { setOpen(ex); return }
+    if (ex) {
+      // tocar num dia marcado tira-o logo, se a semana continuar com o mínimo; senão abre as opções
+      const ctx = { today, days: mine, sessions: snap.sessions, excuses: snap.excuses, closedMonths, minPerWeek: me.min_days_week }
+      if (canUnmark(ex, ctx).ok && (stateOf(ex) === 'planned' || stateOf(ex) === 'today')) {
+        await run(() => api.removePlannedDay(ex.id), `Dia ${dayOfMonth(d)} eliminado`)
+      } else setOpen(ex)
+      return
+    }
     if (cmp(d, today) < 0) return
     await run(() => api.addPlannedDays(me.id, [{ date: d, plan_id: null }]))
   }
@@ -64,7 +71,7 @@ export function Planear() {
       </div>
 
       <section className="stack-sm" aria-label={`Dias de ${monthName(mk)}`}>
-        <p className="small muted">Toca nos dias em que vais treinar.</p>
+        <p className="small muted">Toca num dia para o marcar. Toca outra vez para o eliminar.</p>
         <div className="cal" style={{ gap: 6 }}>
           {WEEKDAY_SHORT.map((w, i) => <div key={i} className="cal-head">{w}</div>)}
           {Array.from({ length: weekday(days[0]) }, (_, i) => <div key={`e${i}`} />)}

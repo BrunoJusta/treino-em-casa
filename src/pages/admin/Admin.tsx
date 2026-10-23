@@ -4,7 +4,7 @@ import { Check, DownloadSimple, X } from '@phosphor-icons/react'
 import { useApp } from '../../data/store'
 import { api } from '../../lib/config'
 import { Avatar } from '../../components/Avatar'
-import { BackHeader, Empty, Sheet } from '../../components/ui'
+import { BackHeader, Empty, Sheet, Switch } from '../../components/ui'
 import { EXCUSE_LABEL } from '../../components/DayActions'
 import { euros, jarTotals } from '../../lib/rules/jar'
 import { longDate, monthLabel, timeAgo, todayLisbon } from '../../lib/dates'
@@ -23,6 +23,7 @@ const TABS = [
   ['regras', 'Regras'],
   ['auditoria', 'Registo'],
   ['exportar', 'Exportar'],
+  ['repor', 'Repor'],
 ] as const
 
 export function Admin() {
@@ -49,6 +50,7 @@ export function Admin() {
         <Route path="regras" element={<Regras />} />
         <Route path="auditoria" element={<Auditoria />} />
         <Route path="exportar" element={<Exportar />} />
+        <Route path="repor" element={<Repor />} />
       </Routes>
     </main>
   )
@@ -255,6 +257,49 @@ function Exportar() {
       <button className="btn secondary big block" onClick={() => download(`dias-marcados-${stamp}.csv`, csv([['Pessoa', 'Dia', 'Estado', 'Automático', 'Mudado de'], ...snap.plannedDays.map((d) => [byId.get(d.profile_id) ?? '', d.date, d.status, d.auto_filled ? 'Sim' : 'Não', d.moved_from ?? ''])]))}>
         <DownloadSimple size={22} weight="bold" /> Dias marcados
       </button>
+    </section>
+  )
+}
+
+function Repor() {
+  const { snap, run } = useApp()
+  const [body, setBody] = useState(false)
+  const [word, setWord] = useState('')
+  const [done, setDone] = useState(false)
+  const n = { sessions: snap.sessions.length, days: snap.plannedDays.length, jar: snap.jar.length, excuses: snap.excuses.length }
+  const go = async () => {
+    const ok = await run(() => api.resetActivity(body).then(() => true), 'Dados repostos')
+    if (ok) { setDone(true); setWord('') }
+  }
+  return (
+    <section className="stack">
+      <div className="card danger stack-sm">
+        <h3>Repor os dados da família</h3>
+        <p className="small" style={{ color: 'var(--ink-2)' }}>Para depois de testares ou mostrares a app. Apaga a atividade de toda a gente e deixa a app como nova.</p>
+      </div>
+      <div className="grid-2">
+        <div className="stat"><b className="num">{n.sessions}</b><span>treinos e fotos</span></div>
+        <div className="stat"><b className="num">{n.days}</b><span>dias marcados</span></div>
+        <div className="stat"><b className="num">{n.jar}</b><span>movimentos do jarro</span></div>
+        <div className="stat"><b className="num">{n.excuses}</b><span>desculpas</span></div>
+      </div>
+      <div className="card soft stack-sm">
+        <p className="strong">O que é apagado</p>
+        <p className="small" style={{ color: 'var(--ink-2)' }}>Treinos e as respetivas fotos, dias marcados, desculpas, multas, pagamentos e gastos do jarro, reações, fechos de mês e o registo de atividade. O XP, os níveis, os streaks e as conquistas voltam a zero, porque são calculados a partir dos treinos.</p>
+        <p className="strong" style={{ marginTop: 6 }}>O que fica</p>
+        <p className="small" style={{ color: 'var(--ink-2)' }}>As pessoas e os códigos de acesso, as fotos de perfil, as restrições, o material, os planos, as regras do jarro e as correções aos exercícios.</p>
+      </div>
+      <label className="row between">
+        <span><span className="strong">Apagar também o peso e o IMC</span><br /><span className="small muted">São dados privados de cada pessoa. Por omissão ficam.</span></span>
+        <Switch checked={body} onChange={setBody} label="Apagar também o peso e o IMC" />
+      </label>
+      <label className="field">
+        <span>Para confirmar, escreve REPOR</span>
+        <input className="input" value={word} onChange={(e) => setWord(e.target.value)} autoComplete="off" autoCapitalize="characters" spellCheck={false} />
+        <span className="help">Não dá para desfazer. Se quiseres guardar alguma coisa, exporta antes em Exportar.</span>
+      </label>
+      <button className="btn danger big block" disabled={word.trim().toUpperCase() !== 'REPOR'} onClick={go}>Repor tudo</button>
+      {done && <p role="status" className="card accent small">Feito. A app está como nova. Os dias de cada pessoa começam a ser marcados outra vez em Planear.</p>}
     </section>
   )
 }
