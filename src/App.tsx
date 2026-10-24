@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useStore } from './data/store'
 import { BottomNav, CelebrationOverlay, Toasts } from './components/ui'
@@ -22,6 +23,8 @@ const NO_NAV = ['/treinar', '/player', '/planos/', '/admin']
 export function App() {
   const { me, loading, snap, error } = useStore()
   const loc = useLocation()
+  // o scroll é do #root (ver app.css), por isso volta ao topo ao mudar de ecrã
+  useEffect(() => { document.getElementById('root')?.scrollTo(0, 0) }, [loc.pathname])
   if (loading) return <Splash />
   if (!me || !snap) {
     if (error && me === null && snap === null) return <Login />
