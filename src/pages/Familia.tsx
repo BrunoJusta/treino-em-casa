@@ -6,7 +6,7 @@ import { buildFeed, useFamily } from '../data/derived'
 import { api } from '../lib/config'
 import { Avatar } from '../components/Avatar'
 import { PixelIcon } from '../components/pixel/Pixel'
-import { Bar, Empty, Photo, Sheet } from '../components/ui'
+import { Bar, Empty, Photo, Sheet, TopBar } from '../components/ui'
 import { monthKey, monthLabel, timeAgo } from '../lib/dates'
 import { BADGES, collectiveBadges, levelFor, rankingFor, xpFor } from '../lib/rules/game'
 import { sfx } from '../lib/fx'
@@ -23,7 +23,7 @@ export function Familia() {
   const tab = (params.get('tab') as 'feed' | 'ranking' | 'conquistas') ?? 'feed'
   return (
     <main className="page">
-      <header className="topbar"><h1>Família</h1></header>
+      <TopBar title="Família" />
       <div className="seg">
         <button aria-pressed={tab === 'feed'} onClick={() => setParams({})}>Feed</button>
         <button aria-pressed={tab === 'ranking'} onClick={() => setParams({ tab: 'ranking' })}>Ranking</button>

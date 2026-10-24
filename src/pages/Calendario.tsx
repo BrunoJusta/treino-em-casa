@@ -4,7 +4,7 @@ import { MyPlanner } from './Planear'
 import { useApp } from '../data/store'
 import { Avatar } from '../components/Avatar'
 import { DayActions, STATE_LABEL } from '../components/DayActions'
-import { Sheet } from '../components/ui'
+import { Sheet, TopBar } from '../components/ui'
 import { cmp, dayOfMonth, longDate, monthDays, monthKey, monthLabel, nextMonth, prevMonth, WEEKDAY_SHORT, weekday } from '../lib/dates'
 import type { PlannedDay } from '../data/types'
 import type { DayState } from '../lib/rules/planning'
@@ -30,9 +30,7 @@ export function Calendario() {
 
   return (
     <main className="page">
-      <header className="topbar">
-        <h1>Calendário</h1>
-      </header>
+      <TopBar title="Calendário" />
       <div className="seg" role="group" aria-label="Vista">
         <button aria-pressed={view === 'eu'} onClick={() => setView('eu')}>O meu</button>
         <button aria-pressed={view === 'familia'} onClick={() => setView('familia')}>Família</button>

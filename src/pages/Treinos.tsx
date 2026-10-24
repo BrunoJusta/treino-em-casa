@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { MagnifyingGlass, Play, Plus, PencilSimple, Warning, CheckCircle } from '@phosphor-icons/react'
 import { useApp } from '../data/store'
-import { ExerciseIcon, Empty } from '../components/ui'
+import { ExerciseIcon, Empty, TopBar } from '../components/ui'
 import { PixelIcon } from '../components/pixel/Pixel'
 import { PATTERN_LABEL } from '../components/pixel/sprites'
 import { conflicts, estMinutes } from '../lib/rules/restrictions'
@@ -15,7 +15,7 @@ export function Treinos() {
   const tab = params.get('tab') === 'exercicios' ? 'exercicios' : 'planos'
   return (
     <main className="page">
-      <header className="topbar"><h1>Treinos</h1></header>
+      <TopBar title="Treinos" />
       <div className="seg">
         <button aria-pressed={tab === 'planos'} onClick={() => setParams({})}>Planos</button>
         <button aria-pressed={tab === 'exercicios'} onClick={() => setParams({ tab: 'exercicios' })}>Exercícios</button>

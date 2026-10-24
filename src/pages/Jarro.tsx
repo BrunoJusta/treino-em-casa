@@ -5,7 +5,7 @@ import { useFamily, usePerson } from '../data/derived'
 import { api } from '../lib/config'
 import { JarMascot, FallingCoin } from '../components/pixel/JarMascot'
 import { Avatar } from '../components/Avatar'
-import { Bar, ConfirmSheet, Empty, Sheet } from '../components/ui'
+import { Bar, ConfirmSheet, Empty, Sheet, TopBar } from '../components/ui'
 import { euros, owedBy } from '../lib/rules/jar'
 import { shortDate, timeAgo, monthName } from '../lib/dates'
 import { sfx } from '../lib/fx'
@@ -47,10 +47,9 @@ export function Jarro() {
 
   return (
     <main className="page">
-      <header className="topbar">
-        <h1>O Jarro</h1>
-        <button className="btn secondary sm" onClick={() => setRules(true)}><BookOpen size={18} weight="bold" /> Regras do jarro</button>
-      </header>
+      <TopBar title="O Jarro">
+        <button className="btn secondary sm" onClick={() => setRules(true)}><BookOpen size={18} weight="bold" /> Regras</button>
+      </TopBar>
 
       <section className="card soft" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, paddingTop: 28, position: 'relative' }}>
         <div style={{ position: 'relative' }}>

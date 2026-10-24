@@ -7,7 +7,7 @@ import { useFamily, usePerson } from '../data/derived'
 import { Avatar } from '../components/Avatar'
 import { JarMascot } from '../components/pixel/JarMascot'
 import { PixelIcon } from '../components/pixel/Pixel'
-import { Bar, Photo } from '../components/ui'
+import { Bar, Photo, ProfileLink } from '../components/ui'
 import { InstallCard } from '../components/InstallCard'
 import { dayOfMonth, longDate, monthKey, monthName, hourLisbon, daysInMonth } from '../lib/dates'
 import { checkMonthWeeks } from '../lib/rules/planning'
@@ -105,12 +105,12 @@ export function Hoje() {
   return (
     <main className="page">
       <header className="row">
-        <Link to="/perfil" aria-label="O meu perfil"><Avatar avatar={me.avatar} color={me.color} name={me.display_name} size={52} /></Link>
         <div className="grow">
           <h1 style={{ fontSize: 24 }}>{greeting()}, {me.display_name}</h1>
           <p className="small muted">{longDate(today)}</p>
         </div>
         {isAdmin && <Link to="/admin" className="icon-btn" aria-label="Backoffice"><GearSix size={22} weight="bold" /></Link>}
+        <ProfileLink />
       </header>
 
       <InstallCard />

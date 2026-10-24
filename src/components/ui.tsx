@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Barbell, CalendarDots, House, UserCircle, UsersThree, X } from '@phosphor-icons/react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Barbell, CalendarDots, House, UsersThree, X } from '@phosphor-icons/react'
 import { Avatar } from './Avatar'
 import { useStore } from '../data/store'
 import { PixelIcon } from './pixel/Pixel'
@@ -78,7 +78,6 @@ export function BottomNav() {
     { to: '/treinos', label: 'Treinos', icon: <Barbell size={22} weight="bold" /> },
     { to: '/jarro', label: 'Jarro', icon: <PixelIcon name="jar" size={22} />, badge: owed },
     { to: '/familia', label: 'Família', icon: <UsersThree size={22} weight="bold" />, badge: pending },
-    { to: '/perfil', label: 'Perfil', icon: me ? <Avatar avatar={me.avatar} color={me.color} name={me.display_name} size={24} /> : <UserCircle size={22} weight="bold" /> },
   ]
   return (
     <nav className="nav" aria-label="Navegação principal">
@@ -218,5 +217,27 @@ export function ConfirmSheet({ open, title, text, confirm, danger, onConfirm, on
         <button className="btn ghost block" onClick={onClose}>Cancelar</button>
       </div>
     </Sheet>
+  )
+}
+
+/** O meu perfil: a minha foto, sempre no canto superior direito dos ecrãs principais. */
+export function ProfileLink() {
+  const { me } = useStore()
+  if (!me) return null
+  return (
+    <Link to="/perfil" className="profile-link" aria-label="O meu perfil">
+      <Avatar avatar={me.avatar} color={me.color} name={me.display_name} size={40} />
+    </Link>
+  )
+}
+
+/** Cabeçalho dos ecrãs principais: título, ações e a foto de perfil à direita. */
+export function TopBar({ title, children }: { title: string; children?: ReactNode }) {
+  return (
+    <header className="topbar">
+      <h1>{title}</h1>
+      {children}
+      <ProfileLink />
+    </header>
   )
 }
