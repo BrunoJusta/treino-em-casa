@@ -77,7 +77,8 @@ describe('fecho do mês', () => {
 describe('planeamento', () => {
   it('semanas cortadas têm mínimo proporcional', () => {
     expect(weekRequirement(7, 2)).toBe(2)
-    expect(weekRequirement(4, 2)).toBe(2)
+    expect(weekRequirement(5, 2)).toBe(2)
+    expect(weekRequirement(4, 2)).toBe(1)
     expect(weekRequirement(3, 2)).toBe(1)
     expect(weekRequirement(1, 2)).toBe(1)
   })
