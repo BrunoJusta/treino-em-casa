@@ -15,7 +15,8 @@ import { euros } from '../lib/rules/jar'
 import { api, isDemo } from '../lib/config'
 import { names } from '../lib/format'
 import { addDays } from '../lib/dates'
-import { nextQuote, type Quote } from '../lib/quotes'
+import { EGG_STYLE, nextQuote, type EggKind, type Quote } from '../lib/quotes'
+import { Ear, Egg, HandFist, Lightning, Radio, Sparkle, Waves, Wind } from '@phosphor-icons/react'
 import { sfx } from '../lib/fx'
 
 function isNight() {
@@ -224,10 +225,12 @@ function JarCard({ mood, level, done, target, balance, owed, goalName }: { mood:
       <div aria-live="polite">
         <AnimatePresence mode="wait">
           {quote ? (
-            <motion.button type="button" key={n} className="jar-quote" onClick={() => setQuote(null)} aria-label="Fechar frase"
+            <motion.button type="button" key={n} className={`jar-quote ${quote.egg ? `egg egg-${quote.egg}` : ''}`} onClick={() => setQuote(null)} aria-label="Fechar frase"
+              style={quote.egg ? { ['--q-bg' as string]: EGG_STYLE[quote.egg].bg, ['--q-line' as string]: EGG_STYLE[quote.egg].line, ['--q-ink' as string]: EGG_STYLE[quote.egg].ink, ['--q-sub' as string]: EGG_STYLE[quote.egg].sub } : undefined}
               initial={{ opacity: 0, y: -8, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.25 }}>
+              {quote.egg && <span className="jar-quote-tag"><EggIcon kind={quote.egg} /> Easter egg: {EGG_STYLE[quote.egg].label}</span>}
               <span className="jar-quote-text">{quote.text}</span>
-              {quote.author && <span className="jar-quote-author">{quote.author}</span>}
+              <span className="jar-quote-author">{quote.author}</span>
             </motion.button>
           ) : (
             <motion.p key="hint" className="tiny muted" style={{ paddingLeft: 4 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>Toca no jarro para uma frase do dia.</motion.p>
@@ -236,4 +239,18 @@ function JarCard({ mood, level, done, target, balance, owed, goalName }: { mood:
       </div>
     </section>
   )
+}
+
+function EggIcon({ kind }: { kind: EggKind }) {
+  const p = { size: 16, weight: 'fill' as const, 'aria-hidden': true }
+  switch (kind) {
+    case 'pewdiepie': return <HandFist {...p} />
+    case 'pokemon': return <Lightning {...p} />
+    case 'digimon': return <Egg {...p} />
+    case 'avatar': return <Wind {...p} weight="bold" />
+    case 'hazbin': return <Radio {...p} />
+    case 'disney': return <Sparkle {...p} />
+    case 'shrek': return <Ear {...p} />
+    case 'percy': return <Waves {...p} weight="bold" />
+  }
 }

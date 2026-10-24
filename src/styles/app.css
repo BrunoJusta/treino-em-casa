@@ -324,7 +324,23 @@ button.cal-day { cursor: pointer; }
 /* ---------- Jarro que fala (Hoje) ---------- */
 .jar-tap { background: none; border: 0; padding: 0; cursor: pointer; flex-shrink: 0; border-radius: 14px; touch-action: manipulation; }
 .jar-tap:focus-visible { outline: 3px solid var(--accent-text); outline-offset: 3px; }
-.jar-quote { position: relative; width: 100%; text-align: left; border: 1px solid var(--accent-line); background: var(--accent-soft); color: var(--ink); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font: inherit; cursor: pointer; }
-.jar-quote::before { content: ''; position: absolute; top: -8px; left: 34px; width: 14px; height: 14px; background: var(--accent-soft); border-left: 1px solid var(--accent-line); border-top: 1px solid var(--accent-line); transform: rotate(45deg); }
+.jar-quote { --q-bg: var(--accent-soft); --q-line: var(--accent-line); --q-ink: var(--ink); --q-sub: var(--muted); position: relative; width: 100%; text-align: left; border: 1px solid var(--q-line); background: var(--q-bg); color: var(--q-ink); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font: inherit; cursor: pointer; }
+.jar-quote::before { content: ''; position: absolute; top: -8px; left: 34px; width: 14px; height: 14px; background: var(--q-bg); border-left: 1px solid var(--q-line); border-top: 1px solid var(--q-line); transform: rotate(45deg); }
 .jar-quote-text { font-size: 16px; font-weight: 600; line-height: 1.35; text-wrap: pretty; }
-.jar-quote-author { font-size: 13px; color: var(--muted); font-weight: 600; }
+.jar-quote-author { font-size: 13px; color: var(--q-sub); font-weight: 600; }
+.jar-quote-author::before { content: '– '; }
+.jar-quote.egg { border-width: 2px; overflow: hidden; }
+.jar-quote.egg::before { border-width: 2px; top: -9px; }
+.jar-quote-tag { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.02em; color: var(--q-line); text-transform: uppercase; }
+/* um detalhe de cada universo */
+.egg-pewdiepie { background-image: linear-gradient(135deg, transparent 82%, rgba(232, 50, 60, 0.35) 82%); }
+.egg-pewdiepie .jar-quote-text { font-weight: 800; }
+.egg-pokemon { background-image: repeating-linear-gradient(-45deg, rgba(245, 190, 59, 0.35) 0 8px, transparent 8px 18px); background-size: 100% 6px; background-repeat: no-repeat; background-position: bottom; }
+.egg-digimon { background-image: repeating-linear-gradient(0deg, rgba(13, 42, 102, 0.06) 0 2px, transparent 2px 6px); font-family: inherit; }
+.egg-digimon .jar-quote-text { letter-spacing: 0.01em; }
+.egg-avatar { background-image: linear-gradient(90deg, #2b7a8c 0 25%, #5b8c3a 25% 50%, #d9482b 50% 75%, #e8c26b 75% 100%); background-size: 100% 4px; background-repeat: no-repeat; background-position: bottom; }
+.egg-hazbin { background-image: repeating-linear-gradient(45deg, rgba(215, 38, 61, 0.12) 0 6px, transparent 6px 14px); }
+.egg-hazbin .jar-quote-text { font-style: italic; }
+.egg-disney { background-image: radial-gradient(circle at 88% 22%, #fff 0 2px, transparent 3px), radial-gradient(circle at 94% 60%, #fff 0 1.5px, transparent 2.5px), radial-gradient(circle at 80% 78%, #fff 0 1.5px, transparent 2.5px), linear-gradient(135deg, #eef0ff, #e4dcff); }
+.egg-shrek { background-image: radial-gradient(ellipse at 100% 100%, rgba(122, 154, 31, 0.28) 0 40px, transparent 41px); }
+.egg-percy { background-image: radial-gradient(circle at 10px -4px, transparent 12px, rgba(31, 127, 168, 0.2) 13px, transparent 14px); background-size: 24px 12px; background-repeat: repeat-x; background-position: bottom; }
