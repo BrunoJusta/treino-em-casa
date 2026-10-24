@@ -76,8 +76,8 @@ export function Corpo() {
 
       <section className="card stack">
         <h3>Registar peso</h3>
-        <div className="row-sm">
-          <label className="field grow"><span>Peso (kg)</span><input className="input num" inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={(e) => e.key === 'Enter' && addWeight()} value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="72,5" /></label>
+        <div className="grid-2">
+          <label className="field"><span>Peso (kg)</span><input className="input num" inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={(e) => e.key === 'Enter' && addWeight()} value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="72,5" /></label>
           <label className="field"><span>Dia</span><input className="input" type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} /></label>
         </div>
         <button className="btn primary big block" onClick={addWeight}>Guardar</button>

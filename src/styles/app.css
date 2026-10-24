@@ -33,7 +33,7 @@
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
-  --nav-h: 72px;
+  --nav-h: 66px;
   color-scheme: light;
   font-family: 'Outfit Variable', 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: var(--ink);
@@ -143,6 +143,10 @@ button.chip { min-height: 36px; }
   width: 100%; min-height: 48px; border-radius: var(--r-ctl); border: 1px solid var(--line-strong); background: var(--bg);
   padding: 0 14px; font-size: 16px;
 }
+/* iPhone: o campo de data tem largura mínima própria e saía do cartão */
+.field { min-width: 0; }
+.input[type='date'] { -webkit-appearance: none; appearance: none; display: block; min-width: 0; max-width: 100%; line-height: 46px; text-align: left; }
+.input[type='date']::-webkit-date-and-time-value { text-align: left; margin: 0; }
 .textarea { padding: 12px 14px; min-height: 88px; resize: vertical; }
 /* select com seta própria e afastada da borda, igual em iPhone e Android */
 .select { -webkit-appearance: none; appearance: none; padding-right: 48px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 256 256'%3E%3Cpath fill='none' stroke='%234C4F69' stroke-width='24' stroke-linecap='round' stroke-linejoin='round' d='M208 96l-80 80-80-80'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 18px center; background-size: 16px 16px; text-overflow: ellipsis; }
@@ -177,9 +181,9 @@ button.list-item:active { background: var(--surface); }
 .nav {
   position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: 100%; max-width: 560px; z-index: 20;
   background: rgba(255, 255, 255, 0.94); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px);
-  box-shadow: var(--shadow-up); padding: 6px 8px calc(6px + var(--safe-b)); display: grid; grid-template-columns: repeat(5, 1fr);
+  box-shadow: var(--shadow-up); padding: 6px 8px max(6px, calc(var(--safe-b) - 18px)); display: grid; grid-template-columns: repeat(5, 1fr);
 }
-.nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 58px; border-radius: 14px; color: var(--muted); text-decoration: none; font-size: 12.5px; font-weight: 600; position: relative; min-width: 0; }
+.nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 54px; border-radius: 14px; color: var(--muted); text-decoration: none; font-size: 12.5px; font-weight: 600; position: relative; min-width: 0; }
 .nav a.active { color: var(--ink); }
 .nav a.active .nav-ico { background: var(--accent-soft); color: var(--accent-text); }
 .nav-ico { width: 52px; height: 30px; border-radius: 999px; display: grid; place-items: center; transition: background 0.2s; }
