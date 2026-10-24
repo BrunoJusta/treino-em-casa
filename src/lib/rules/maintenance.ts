@@ -48,7 +48,8 @@ export function runMaintenanceOn(snap: Snapshot, today: string, uid: () => strin
   // 3
   const mk = monthKey(today)
   if (dayOfMonth(today) > s.settings.plan_window_end_day) {
-    for (const p of s.profiles.filter((x) => x.active)) {
+    // só quem já existia no início do mês (quem entra a meio começa no mês seguinte)
+    for (const p of s.profiles.filter((x) => x.active && x.created_at.slice(0, 7) < mk)) {
       const flag = `autofill:${p.id}:${mk}`
       if (s.audit.some((a) => a.entity_id === flag)) continue
       const marked = s.plannedDays.filter((d) => d.profile_id === p.id && monthKey(d.date) === mk).map((d) => d.date)

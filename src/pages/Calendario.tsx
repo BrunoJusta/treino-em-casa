@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { CaretLeft, CaretRight, CalendarPlus } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight } from '@phosphor-icons/react'
+import { MyPlanner } from './Planear'
 import { useApp } from '../data/store'
 import { Avatar } from '../components/Avatar'
 import { DayActions, STATE_LABEL } from '../components/DayActions'
@@ -12,7 +12,7 @@ import type { DayState } from '../lib/rules/planning'
 export function Calendario() {
   const { snap, me, today, stateOf } = useApp()
   const [mk, setMk] = useState(monthKey(today))
-  const [view, setView] = useState<'familia' | 'eu'>('familia')
+  const [view, setView] = useState<'familia' | 'eu'>('eu')
   const [selDay, setSelDay] = useState<string | null>(null)
   const [myDay, setMyDay] = useState<PlannedDay | null>(null)
   const people = snap.profiles.filter((p) => p.active)
@@ -32,11 +32,10 @@ export function Calendario() {
     <main className="page">
       <header className="topbar">
         <h1>Calendário</h1>
-        <Link to="/planear" className="btn secondary sm"><CalendarPlus size={18} weight="bold" /> Planear</Link>
       </header>
       <div className="seg" role="group" aria-label="Vista">
+        <button aria-pressed={view === 'eu'} onClick={() => setView('eu')}>O meu</button>
         <button aria-pressed={view === 'familia'} onClick={() => setView('familia')}>Família</button>
-        <button aria-pressed={view === 'eu'} onClick={() => setView('eu')}>Só eu</button>
       </div>
       <div className="row between">
         <button className="icon-btn" aria-label="Mês anterior" onClick={() => setMk(prevMonth(mk))}><CaretLeft size={20} weight="bold" /></button>
@@ -44,22 +43,14 @@ export function Calendario() {
         <button className="icon-btn" aria-label="Mês seguinte" onClick={() => setMk(nextMonth(mk))}><CaretRight size={20} weight="bold" /></button>
       </div>
 
+      {view === 'eu' ? <MyPlanner mk={mk} /> : (
+      <>
       <div className="cal">
         {WEEKDAY_SHORT.map((w, i) => <div key={i} className="cal-head" aria-hidden>{w}</div>)}
         {Array.from({ length: lead }, (_, i) => <div key={`e${i}`} className="cal-day empty" />)}
         {days.map((d) => {
           const list = byDate.get(d) ?? []
           const past = cmp(d, today) < 0
-          if (view === 'eu') {
-            const mine = list.find((x) => x.profile_id === me.id)
-            const st = mine ? stateOf(mine) : null
-            const extra = extraOn(d, me.id)
-            return (
-              <button key={d} className={`plan-day ${st ? (st === 'today' || st === 'planned' ? 'on' : st) : extra ? 'done' : ''} ${d === today ? 'today' : ''}`} onClick={() => (mine ? setMyDay(mine) : setSelDay(d))} aria-label={`${longDate(d)}${st ? `, ${STATE_LABEL[st]}` : extra ? ', treino extra' : ''}`}>
-                {dayOfMonth(d)}
-              </button>
-            )
-          }
           return (
             <button key={d} className={`cal-day ${d === today ? 'today' : ''} ${past ? 'past' : ''}`} onClick={() => setSelDay(d)} aria-label={`${longDate(d)}, ${list.length} marcados`}>
               <span className="num">{dayOfMonth(d)}</span>
@@ -77,7 +68,7 @@ export function Calendario() {
       </div>
 
       <section className="card soft stack-sm" aria-label="Legenda">
-        {view === 'familia' && (
+        {(
           <div className="row-sm wrap">
             {people.map((p) => <span key={p.id} className="chip" style={{ background: '#fff' }}><i className="cal-dot done" style={{ color: p.color }} /> {p.display_name}</span>)}
           </div>
@@ -90,6 +81,8 @@ export function Calendario() {
           <span className="row-sm"><i className="cal-dot excused" /> desculpado</span>
         </div>
       </section>
+      </>
+      )}
 
       <Sheet open={!!selDay} onClose={() => setSelDay(null)} title={selDay ? longDate(selDay) : ''}>
         {selDay && (

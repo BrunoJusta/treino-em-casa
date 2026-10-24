@@ -50,15 +50,15 @@ function Planos() {
   }
   return (
     <>
+      <Link to="/planos/novo" className="btn primary big block"><Plus size={22} weight="bold" /> Novo plano</Link>
       <section className="stack">
-        <div className="section-title"><h2>Da família</h2>{isAdmin && <Link to="/planos/novo?familia=1" className="small strong">Novo</Link>}</div>
+        <div className="section-title"><h2>Da família</h2></div>
         {family.map((p) => <div key={p.id}>{Card({ id: p.id })}</div>)}
       </section>
       <section className="stack">
         <div className="section-title"><h2>Os meus</h2></div>
         {mine.map((p) => <div key={p.id}>{Card({ id: p.id })}</div>)}
         {!mine.length && <Empty title="Ainda não tens planos teus" text="Monta um treino à tua medida, com os exercícios e o material lá de baixo." mood="happy" />}
-        <Link to="/planos/novo" className="btn secondary big block"><Plus size={22} weight="bold" /> Criar plano</Link>
       </section>
     </>
   )
@@ -69,36 +69,31 @@ export function useExerciseFilter(initial?: { pattern?: Pattern | 'all' }) {
   const [q, setQ] = useState('')
   const [pattern, setPattern] = useState<Pattern | 'all'>(initial?.pattern ?? 'all')
   const [equip, setEquip] = useState<string>('all')
-  const [onlyReviewed, setOnlyReviewed] = useState(false)
   const list = useMemo(() => {
     const nq = q.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
     return exercises
       .filter((e) => !e.hidden)
       .filter((e) => pattern === 'all' || e.pattern === pattern)
       .filter((e) => equip === 'all' || (equip === 'none' ? !e.equipment_ids.length : e.equipment_ids.includes(equip)))
-      .filter((e) => !onlyReviewed || e.reviewed)
       .filter((e) => !nq || `${e.name_pt} ${e.name_en ?? ''} ${e.primary_muscles.join(' ')}`.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().includes(nq))
       .sort((a, b) => Number(b.reviewed) - Number(a.reviewed) || a.name_pt.localeCompare(b.name_pt, 'pt'))
-  }, [exercises, q, pattern, equip, onlyReviewed])
+  }, [exercises, q, pattern, equip])
   const controls = (
     <div className="stack-sm">
       <label className="row" style={{ position: 'relative' }}>
         <MagnifyingGlass size={20} style={{ position: 'absolute', left: 14, color: 'var(--muted)' }} aria-hidden />
         <input className="input" style={{ paddingLeft: 44 }} placeholder="Procurar, por exemplo supino ou glúteos…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Procurar exercícios" type="search" enterKeyHint="search" autoComplete="off" spellCheck={false} />
       </label>
-      <div className="chips" role="group" aria-label="Padrão de movimento">
-        <button className={`chip ${pattern === 'all' ? 'on' : ''}`} aria-pressed={pattern === 'all'} onClick={() => setPattern('all')}>Todos</button>
-        {(Object.keys(PATTERN_LABEL) as Pattern[]).map((p) => (
-          <button key={p} className={`chip ${pattern === p ? 'on' : ''}`} aria-pressed={pattern === p} onClick={() => setPattern(p)}>{PATTERN_LABEL[p]}</button>
-        ))}
-      </div>
-      <div className="row-sm">
-        <select className="select grow" value={equip} onChange={(e) => setEquip(e.target.value)} aria-label="Material">
+      <div className="grid-2" style={{ gap: 8 }}>
+        <select className="select" value={pattern} onChange={(e) => setPattern(e.target.value as Pattern | 'all')} aria-label="Tipo de movimento">
+          <option value="all">Todos os movimentos</option>
+          {(Object.keys(PATTERN_LABEL) as Pattern[]).map((p) => <option key={p} value={p}>{PATTERN_LABEL[p]}</option>)}
+        </select>
+        <select className="select" value={equip} onChange={(e) => setEquip(e.target.value)} aria-label="Material">
           <option value="all">Todo o material</option>
           <option value="none">Peso do corpo</option>
           {snap.equipment.map((e) => <option key={e.id} value={e.id}>{e.name}{e.status === 'arriving' ? ' (a chegar)' : e.status === 'broken' ? ' (avariado)' : ''}</option>)}
         </select>
-        <button className={`chip ${onlyReviewed ? 'on' : ''}`} onClick={() => setOnlyReviewed((v) => !v)} aria-pressed={onlyReviewed}>Revistos</button>
       </div>
     </div>
   )

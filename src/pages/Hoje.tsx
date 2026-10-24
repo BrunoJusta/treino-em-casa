@@ -138,7 +138,7 @@ export function Hoje() {
       )}
 
       {needsPlanning && (
-        <Link to="/planear" className="card accent tap row" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link to="/calendario" className="card accent tap row" style={{ textDecoration: 'none', color: 'inherit' }}>
           <CalendarPlus size={28} weight="bold" color="var(--accent-text)" />
           <div className="grow">
             <p className="strong">Planeia {monthName(mk)}</p>
@@ -156,21 +156,21 @@ export function Hoje() {
         </Link>
       )}
 
-      <section className="grid-3">
-        <div className="stat">
-          <PixelIcon name="flame" size={26} />
+      <section className="grid-3" aria-label="Os meus números">
+        <div className="kpi">
+          <span className="kpi-ico"><PixelIcon name="flame" size={22} /></span>
           <b className="num">{p.streak.weeks}</b>
-          <span>{p.streak.weeks === 1 ? 'semana seguida' : 'semanas seguidas'}{p.streak.shield ? ' + escudo' : ''}</span>
+          <span>{p.streak.weeks === 1 ? 'semana seguida' : 'semanas seguidas'}{p.streak.shield ? ', com escudo' : ''}</span>
         </div>
-        <Link to="/perfil" className="stat" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <PixelIcon name="star" size={26} />
-          <b style={{ fontSize: 18 }}>{p.level.name}</b>
+        <Link to="/perfil" className="kpi">
+          <span className="kpi-ico"><PixelIcon name="star" size={22} /></span>
+          <b>{p.level.name}</b>
           <span className="num">{p.xp} XP</span>
         </Link>
-        <Link to="/calendario" className="stat" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <PixelIcon name="dumbbell" size={26} />
+        <Link to="/calendario" className="kpi">
+          <span className="kpi-ico"><PixelIcon name="dumbbell" size={22} /></span>
           <b className="num">{p.monthDone}/{p.monthDays.length}</b>
-          <span>em {monthName(mk)}</span>
+          <span>treinos em {monthName(mk)}</span>
         </Link>
       </section>
 

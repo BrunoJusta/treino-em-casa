@@ -45,6 +45,14 @@ export function Perfil() {
         </div>
       </section>
 
+      {self && (
+        <Link to="/corpo" className="card accent tap row" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <span className="kpi-ico" style={{ width: 44, height: 44 }}><PixelIcon name="heart" size={28} /></span>
+          <div className="grow"><p className="strong">Peso e IMC</p><p className="small" style={{ color: 'var(--ink-2)' }}>Evolução do peso. Privado, só tu vês.</p></div>
+          <CaretRight size={20} />
+        </Link>
+      )}
+
       <section className="card stack-sm">
         <div className="row between"><span className="strong num">{p.xp} XP</span><span className="small muted">{p.level.next ? `faltam ${p.level.toNext} para ${p.level.next}` : 'Nível máximo!'}</span></div>
         <Bar value={p.level.progress} tone="pixel" label="Progresso de nível" />
@@ -96,11 +104,6 @@ export function Perfil() {
 
       {self && (
         <section className="list">
-          <Link to="/corpo" className="list-item" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <PixelIcon name="heart" size={28} />
-            <div className="grow"><p className="strong">Peso e IMC</p><p className="small muted">Privado. Só tu vês.</p></div>
-            <CaretRight size={20} />
-          </Link>
           <label className="list-item">
             <PixelIcon name="star" size={28} />
             <div className="grow"><p className="strong">Voz no treino</p><p className="small muted">Conta as séries e o descanso em voz alta.</p></div>

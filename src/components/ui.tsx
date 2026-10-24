@@ -1,7 +1,8 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Barbell, CalendarDots, House, UsersThree, X } from '@phosphor-icons/react'
+import { ArrowLeft, Barbell, CalendarDots, House, UserCircle, UsersThree, X } from '@phosphor-icons/react'
+import { Avatar } from './Avatar'
 import { useStore } from '../data/store'
 import { PixelIcon } from './pixel/Pixel'
 import { JarMascot } from './pixel/JarMascot'
@@ -77,6 +78,7 @@ export function BottomNav() {
     { to: '/treinos', label: 'Treinos', icon: <Barbell size={22} weight="bold" /> },
     { to: '/jarro', label: 'Jarro', icon: <PixelIcon name="jar" size={22} />, badge: owed },
     { to: '/familia', label: 'Família', icon: <UsersThree size={22} weight="bold" />, badge: pending },
+    { to: '/perfil', label: 'Perfil', icon: me ? <Avatar avatar={me.avatar} color={me.color} name={me.display_name} size={24} /> : <UserCircle size={22} weight="bold" /> },
   ]
   return (
     <nav className="nav" aria-label="Navegação principal">
@@ -187,10 +189,9 @@ export function Empty({ title, text, action, mood = 'sleepy' }: { title: string;
 
 export function Switch({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
-    <label className="switch">
-      <input type="checkbox" role="switch" checked={checked} onChange={(e) => onChange(e.target.checked)} aria-label={label} />
-      <span />
-    </label>
+    <button type="button" role="switch" aria-checked={checked} aria-label={label} className={`switch ${checked ? 'on' : ''}`} onClick={(e) => { e.preventDefault(); onChange(!checked) }}>
+      <span className="switch-knob" aria-hidden />
+    </button>
   )
 }
 

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { CheckCircle, Coins, ForkKnife } from '@phosphor-icons/react'
+import { BookOpen, CheckCircle, Coins, ForkKnife } from '@phosphor-icons/react'
 import { useApp } from '../data/store'
 import { useFamily, usePerson } from '../data/derived'
 import { api } from '../lib/config'
 import { JarMascot, FallingCoin } from '../components/pixel/JarMascot'
 import { Avatar } from '../components/Avatar'
-import { Bar, ConfirmSheet, Empty } from '../components/ui'
+import { Bar, ConfirmSheet, Empty, Sheet } from '../components/ui'
 import { euros, owedBy } from '../lib/rules/jar'
 import { shortDate, timeAgo, monthName } from '../lib/dates'
 import { sfx } from '../lib/fx'
@@ -18,6 +18,7 @@ export function Jarro() {
   const mine = usePerson(me)!
   const [drops, setDrops] = useState(0)
   const [payFor, setPayFor] = useState<string | null>(null)
+  const [rules, setRules] = useState(false)
   const s = snap.settings
   const level = Math.min(1, fam.jar.potential / Math.max(1, s.goal_cents))
   const owed = owedBy(snap.jar, snap.profiles)
@@ -46,7 +47,10 @@ export function Jarro() {
 
   return (
     <main className="page">
-      <header className="topbar"><h1>O Jarro</h1></header>
+      <header className="topbar">
+        <h1>O Jarro</h1>
+        <button className="btn secondary sm" onClick={() => setRules(true)}><BookOpen size={18} weight="bold" /> Regras do jarro</button>
+      </header>
 
       <section className="card soft" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, paddingTop: 28, position: 'relative' }}>
         <div style={{ position: 'relative' }}>
@@ -91,8 +95,7 @@ export function Jarro() {
         text={payFor ? `${byId.get(payFor)?.display_name} meteu ${euros(owed.find((o) => o.profile.id === payFor)?.cents ?? 0)} no jarro. Todas as multas por pagar ficam como pagas.` : ''}
         confirm="Sim, pagou" onConfirm={() => { if (payFor) void markPaid(payFor) }} />
 
-      <section className="card stack-sm">
-        <h3>Regras do jarro</h3>
+      <Sheet open={rules} onClose={() => setRules(false)} title="Regras do jarro">
         <ul className="small" style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)', display: 'flex', flexDirection: 'column', gap: 6 }}>
           <li>Cada pessoa marca pelo menos {me.min_days_week} dias por semana (1 nas semanas cortadas do mês). Planeia-se de dia 1 a {s.plan_window_end_day}.</li>
           <li>Os dias mudam-se quando quiseres, dentro do mesmo mês. Um dia que passou sem treino fica "por recuperar".</li>
@@ -103,7 +106,7 @@ export function Jarro() {
           <li>Para contar, o treino precisa de uma foto tirada no fim. Só contam treinos lá em baixo.</li>
           <li>O dinheiro é gasto em conjunto: {s.goal_name}.</li>
         </ul>
-      </section>
+      </Sheet>
 
       <section className="stack">
         <h2>Histórico</h2>

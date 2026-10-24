@@ -1,18 +1,17 @@
 import { useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { CheckCircle, Repeat, WarningCircle } from '@phosphor-icons/react'
 import { useApp } from '../data/store'
 import { api } from '../lib/config'
-import { BackHeader } from '../components/ui'
 import { DayActions, STATE_LABEL } from '../components/DayActions'
-import { cmp, dayOfMonth, longDate, monthDays, monthKey, monthLabel, monthName, nextMonth, prevMonth, WEEKDAY_ABBR, WEEKDAY_SHORT, weekday } from '../lib/dates'
+import { cmp, dayOfMonth, longDate, monthDays, monthKey, monthName, prevMonth, WEEKDAY_ABBR, WEEKDAY_SHORT, weekday } from '../lib/dates'
 import { canUnmark, checkMonthWeeks, monthRequirement, repeatPattern } from '../lib/rules/planning'
 import { sfx, vibrate } from '../lib/fx'
 import type { PlannedDay } from '../data/types'
 
-export function Planear() {
+/** O meu calendário: marcar, eliminar e mudar dias, e escolher o treino de cada dia. Vive dentro do Calendário. */
+export function MyPlanner({ mk }: { mk: string }) {
   const { snap, me, today, run, stateOf, closedMonths } = useApp()
-  const cur = monthKey(today)
-  const [mk, setMk] = useState(cur)
   const [open, setOpen] = useState<PlannedDay | null>(null)
   const mine = snap.plannedDays.filter((d) => d.profile_id === me.id)
   const monthMine = mine.filter((d) => monthKey(d.date) === mk)
@@ -46,19 +45,11 @@ export function Planear() {
     await run(() => api.addPlannedDays(me.id, proposal.map((date) => ({ date, plan_id: null }))), `${proposal.length} dias marcados`)
   }
 
-  const setWeekdayPlan = async (wd: number, planId: string) => {
-    const targets = monthMine.filter((d) => weekday(d.date) === wd && cmp(d.date, today) >= 0 && (stateOf(d) === 'planned' || stateOf(d) === 'today'))
-    await run(async () => { for (const t of targets) await api.updatePlannedDay(t.id, { plan_id: planId || null }) }, 'Treinos atribuídos')
-  }
-  const usedWeekdays = [...new Set(monthMine.filter((d) => cmp(d.date, today) >= 0).map((d) => weekday(d.date)))].sort()
+  const upcoming = monthMine.filter((d) => cmp(d.date, today) >= 0 && (stateOf(d) === 'planned' || stateOf(d) === 'today')).sort((x, y) => cmp(x.date, y.date))
+  const setDayPlan = (id: string, planId: string) => run(() => api.updatePlannedDay(id, { plan_id: planId || null }), 'Treino escolhido')
 
   return (
-    <main className="page">
-      <BackHeader title="Planear o mês" to="/calendario" />
-      <div className="seg">
-        <button aria-pressed={mk === cur} onClick={() => setMk(cur)}>{monthLabel(cur)}</button>
-        <button aria-pressed={mk === nextMonth(cur)} onClick={() => setMk(nextMonth(cur))}>{monthLabel(nextMonth(cur))}</button>
-      </div>
+    <>
 
       <div className={`card ${allOk ? 'accent' : 'warn'} row`}>
         {allOk ? <CheckCircle size={30} weight="fill" color="var(--accent-text)" /> : <WarningCircle size={30} weight="fill" color="var(--warn)" />}
@@ -71,7 +62,7 @@ export function Planear() {
       </div>
 
       <section className="stack-sm" aria-label={`Dias de ${monthName(mk)}`}>
-        <p className="small muted">Toca num dia para o marcar. Toca outra vez para o eliminar.</p>
+        <p className="small muted">Toca num dia para o marcar. Toca outra vez para o eliminar. Nos dias que já passaram, tocar abre as opções.</p>
         <div className="cal" style={{ gap: 6 }}>
           {WEEKDAY_SHORT.map((w, i) => <div key={i} className="cal-head">{w}</div>)}
           {Array.from({ length: weekday(days[0]) }, (_, i) => <div key={`e${i}`} />)}
@@ -92,7 +83,7 @@ export function Planear() {
       <section className="list" aria-label="Semanas">
         {weeks.map((w) => (
           <div key={w.start} className="list-item" style={{ minHeight: 48, padding: '10px 16px' }}>
-            <span className="grow small">Semana de {dayOfMonth(w.days[0])} a {dayOfMonth(w.days.at(-1)!)}</span>
+            <span className="grow small">{w.days.length === 1 ? `Semana só com o dia ${dayOfMonth(w.days[0])}` : `Semana de ${dayOfMonth(w.days[0])} a ${dayOfMonth(w.days.at(-1)!)}`}</span>
             <span className={`chip ${w.ok ? 'ok' : 'warn'} num`}>{w.count}/{w.required}</span>
           </div>
         ))}
@@ -102,27 +93,32 @@ export function Planear() {
         <button className="btn secondary big block" onClick={repeat}><Repeat size={22} weight="bold" /> Repetir o padrão de {monthName(prevMonth(mk))}</button>
       )}
 
-      {usedWeekdays.length > 0 && plans.length > 0 && (
+      {upcoming.length > 0 && plans.length > 0 && (
         <section className="stack">
           <h2>Que treino em cada dia?</h2>
-          <p className="small muted">Opcional. Aplica a todos os dias marcados desse dia da semana, daqui para a frente.</p>
+          <p className="small muted">Opcional. Escolhe o treino de cada dia marcado. Podes mudar até ao próprio dia.</p>
           <div className="list">
-            {usedWeekdays.map((wd) => {
-              const sample = monthMine.find((d) => weekday(d.date) === wd && cmp(d.date, today) >= 0)
-              return (
-                <label key={wd} className="list-item">
-                  <span className="grow strong" style={{ textTransform: 'capitalize' }}>{WEEKDAY_ABBR[wd]}</span>
-                  <select className="select" style={{ width: 'auto', minWidth: 170 }} value={sample?.plan_id ?? ''} onChange={(e) => setWeekdayPlan(wd, e.target.value)}>
-                    <option value="">Escolho na hora</option>
-                    {plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
-                </label>
-              )
-            })}
+            {upcoming.map((d) => (
+              <label key={d.id} className="list-item">
+                <span className="grow">
+                  <span className="strong" style={{ textTransform: 'capitalize' }}>{WEEKDAY_ABBR[weekday(d.date)]}, {dayOfMonth(d.date)}</span>
+                  {d.date === today && <span className="chip on" style={{ marginLeft: 8, fontSize: 12, padding: '2px 8px' }}>hoje</span>}
+                </span>
+                <select className="select" style={{ width: 'auto', minWidth: 170 }} value={d.plan_id ?? ''} onChange={(e) => setDayPlan(d.id, e.target.value)} aria-label={`Treino de ${longDate(d.date)}`}>
+                  <option value="">Escolho na hora</option>
+                  {plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </label>
+            ))}
           </div>
         </section>
       )}
       <DayActions day={open} onClose={() => setOpen(null)} />
-    </main>
+    </>
   )
+}
+
+/** /planear passou para dentro do Calendário. */
+export function Planear() {
+  return <Navigate to="/calendario" replace />
 }

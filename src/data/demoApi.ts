@@ -306,6 +306,9 @@ export const demoApi: DataApi = {
       snap.reactions = []
       snap.closures = []
       snap.audit = []
+      // depois de repor, o mês atual não volta a ser preenchido automaticamente
+      const mk = monthKey(todayLisbon())
+      for (const p of snap.profiles) snap.audit.push({ id: uid(), actor_id: currentUser, action: 'month.autofill', entity: 'planned_days', entity_id: `autofill:${p.id}:${mk}`, detail: 'Sem preenchimento automático depois de repor', created_at: now() })
     }, { action: 'reset.activity', entity: 'all', detail: includeBody ? 'Dados repostos (incluindo peso e IMC)' : 'Dados repostos' })
     if (includeBody) {
       try { Object.keys(localStorage).filter((k) => k.startsWith('tec-demo-body')).forEach((k) => localStorage.setItem(k, k.endsWith('metrics') ? '[]' : 'null')) } catch { /* nada */ }
