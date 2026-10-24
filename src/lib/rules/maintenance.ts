@@ -1,13 +1,13 @@
-import { cmp, dayOfMonth, monthKey, monthName, prevMonth } from '../dates'
+import { cmp, dayOfMonth, monthKey, monthName } from '../dates'
 import { computeMonthClose, monthsToClose, pendingExcusesFor, shouldAutoApprove } from './jar'
-import { autofillDates } from './planning'
+import { repeatDates } from './planning'
 import type { Snapshot } from '../../data/types'
 
 /**
  * Manutenção diária (idempotente). No Supabase o equivalente corre em SQL com pg_cron (ver supabase/migrations).
  * 1. Aceita desculpas pendentes do mês anterior a partir do dia 6.
  * 2. Fecha os meses anteriores de quem não tem desculpas pendentes: marca falhas e lança multas.
- * 3. A partir do dia 6, completa automaticamente as semanas abaixo do mínimo no mês atual.
+ * 3. Para quem ligou "Repetir todas as semanas", marca no mês os mesmos dias da semana, com o mesmo treino.
  */
 export function runMaintenanceOn(snap: Snapshot, today: string, uid: () => string, nowIso: string): Snapshot {
   const s: Snapshot = structuredClone(snap)
@@ -45,19 +45,14 @@ export function runMaintenanceOn(snap: Snapshot, today: string, uid: () => strin
       s.audit.push({ id: uid(), actor_id: null, action: 'month.close', entity: 'profile', entity_id: p.id, detail: `Fecho de ${mk}: ${res.missedDays.length} falhas, ${total / 100} €`, created_at: nowIso })
     }
   }
-  // 3
+  // 3. repetir todas as semanas, só para quem o pediu (cada mês é preenchido uma vez, de hoje em diante)
   const mk = monthKey(today)
-  if (dayOfMonth(today) > s.settings.plan_window_end_day) {
-    // só quem já existia no início do mês (quem entra a meio começa no mês seguinte)
-    for (const p of s.profiles.filter((x) => x.active && x.created_at.slice(0, 7) < mk)) {
-      const flag = `autofill:${p.id}:${mk}`
-      if (s.audit.some((a) => a.entity_id === flag)) continue
-      const marked = s.plannedDays.filter((d) => d.profile_id === p.id && monthKey(d.date) === mk).map((d) => d.date)
-      const prev = s.plannedDays.filter((d) => d.profile_id === p.id && monthKey(d.date) === prevMonth(mk)).map((d) => d.date)
-      const add = autofillDates(mk, marked, prev, p.min_days_week, today)
-      for (const date of add) s.plannedDays.push({ id: uid(), profile_id: p.id, date, plan_id: null, status: 'planned', auto_filled: true, moved_from: null })
-      s.audit.push({ id: uid(), actor_id: null, action: 'month.autofill', entity: 'planned_days', entity_id: flag, detail: add.length ? `Preenchidos ${add.length} dias automaticamente` : 'Mês já estava completo', created_at: nowIso })
-    }
+  for (const p of s.profiles.filter((x) => x.active && x.repeat_weekly?.length)) {
+    const flag = `repeat:${p.id}:${mk}`
+    if (s.audit.some((a) => a.entity_id === flag)) continue
+    const add = repeatDates(mk, today, p.repeat_weekly!, s.plannedDays.filter((d) => d.profile_id === p.id).map((d) => d.date))
+    for (const x of add) s.plannedDays.push({ id: uid(), profile_id: p.id, date: x.date, plan_id: x.plan_id, status: 'planned', auto_filled: true, moved_from: null })
+    s.audit.push({ id: uid(), actor_id: null, action: 'month.repeat', entity: 'planned_days', entity_id: flag, detail: `Repetição semanal: ${add.length} dias marcados`, created_at: nowIso })
   }
   return s
 }

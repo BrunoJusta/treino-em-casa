@@ -294,6 +294,15 @@ export const demoApi: DataApi = {
     const { metrics } = await this.getBody()
     safeSet(bodyKey('metrics'), JSON.stringify(metrics.filter((m) => m.id !== id)))
   },
+  async setRepeatWeekly(profileId, pattern, fill, months) {
+    if (profileId !== currentUser) requireAdmin()
+    mutate((s) => {
+      const p = s.profiles.find((x) => x.id === profileId)
+      if (p) p.repeat_weekly = pattern
+      for (const f of fill) if (!s.plannedDays.some((d) => d.profile_id === profileId && d.date === f.date)) s.plannedDays.push({ id: uid(), profile_id: profileId, date: f.date, plan_id: f.plan_id, status: 'planned', auto_filled: true, moved_from: null })
+      for (const m of months) s.audit.push({ id: uid(), actor_id: currentUser, action: 'month.repeat', entity: 'planned_days', entity_id: `repeat:${profileId}:${m}`, detail: `Repetição semanal: ${fill.length} dias marcados`, created_at: now() })
+    }, { action: pattern ? 'repeat.on' : 'repeat.off', entity: 'profile', entity_id: profileId, detail: pattern ? 'Repetir todas as semanas ligado' : 'Repetir todas as semanas desligado' })
+  },
   async resetActivity(includeBody) {
     requireAdmin()
     const s = load()

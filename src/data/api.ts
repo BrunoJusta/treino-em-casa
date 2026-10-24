@@ -73,6 +73,8 @@ export interface DataApi {
   saveBodyProfile(p: BodyProfile): Promise<void>
   addBodyMetric(date: string, weight_kg: number): Promise<void>
   deleteBodyMetric(id: string): Promise<void>
+  // repetir todas as semanas: guarda o padrão, marca os dias e anota os meses já preenchidos
+  setRepeatWeekly(profileId: string, pattern: { wd: number; plan_id: string | null }[] | null, fill: { date: string; plan_id: string | null }[], months: string[]): Promise<void>
   // backoffice: apaga a atividade de todos (treinos, fotos, dias, jarro, registo)
   resetActivity(includeBody: boolean): Promise<void>
   // manutenção (no Supabase corre no servidor com pg_cron; no demo corre ao abrir)

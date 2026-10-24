@@ -47,7 +47,7 @@ export function Perfil() {
 
       {self && (
         <Link to="/corpo" className="card accent tap row" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <span className="kpi-ico" style={{ width: 44, height: 44 }}><PixelIcon name="heart" size={28} /></span>
+          <span aria-hidden style={{ width: 44, height: 44, display: "grid", placeItems: "center", flexShrink: 0 }}><PixelIcon name="heart" size={32} /></span>
           <div className="grow"><p className="strong">Peso e IMC</p><p className="small" style={{ color: 'var(--ink-2)' }}>Evolução do peso. Privado, só tu vês.</p></div>
           <CaretRight size={20} />
         </Link>

@@ -260,6 +260,11 @@ export function createSupabaseApi(url: string, anon: string): DataApi {
     async deleteBodyMetric(id) {
       must(await sb.from('body_metrics').delete().eq('id', id))
     },
+    async setRepeatWeekly(profileId, pattern, fill, months) {
+      must(await sb.from('profiles').update({ repeat_weekly: pattern }).eq('id', profileId))
+      if (fill.length) must(await sb.from('planned_days').upsert(fill.map((f) => ({ profile_id: profileId, date: f.date, plan_id: f.plan_id, auto_filled: true, status: 'planned' })), { onConflict: 'profile_id,date', ignoreDuplicates: true }))
+      if (months.length) must(await sb.from('audit_log').insert(months.map((m) => ({ actor_id: uid, action: 'month.repeat', entity: 'planned_days', entity_id: `repeat:${profileId}:${m}`, detail: `Repetição semanal: ${fill.length} dias marcados` }))))
+    },
     async resetActivity(includeBody) {
       // primeiro as fotos (o Storage só se apaga pela API), depois as tabelas
       const people = (must(await sb.from('profiles').select('id')) ?? []) as { id: string }[]

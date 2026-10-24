@@ -39,10 +39,10 @@ npx supabase link --project-ref <project-ref>
 npx supabase db push
 ```
 
-Isto corre as migrações de `supabase/migrations` (esquema, lógica, seed, cabo de baixo e repor dados):
+Isto corre as migrações de `supabase/migrations` (esquema, lógica, seed, cabo de baixo, repor dados e repetir semanal):
 
 1. `..._schema.sql`: tabelas, RLS e proteções (triggers).
-2. `..._logic.sql`: desculpas, jarro, fecho do mês, preenchimento automático, buckets `photos` (privado) e `avatars` (público), e o agendamento de hora a hora com `pg_cron`.
+2. `..._logic.sql`: desculpas, jarro, fecho do mês, repetição semanal (opcional), buckets `photos` (privado) e `avatars` (público), e o agendamento de hora a hora com `pg_cron`.
 3. `..._seed.sql`: material da casa e os 4 planos da família.
 
 Se o `db push` se queixar do `pg_cron`, ativa-o em Database > Extensions (ou Integrations > Cron) e corre outra vez.

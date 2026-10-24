@@ -42,14 +42,14 @@ export function DayActions({ day, onClose }: { day: PlannedDay | null; onClose: 
         <div className="stack">
           <div className="row-sm wrap">
             <span className={`chip ${st === 'done' ? 'ok' : st === 'recover' ? 'warn' : st === 'missed' ? 'danger' : st === 'today' || st === 'planned' ? 'on' : ''}`}>{STATE_LABEL[st]}</span>
-            {day.auto_filled && <span className="chip">Preenchido pela app</span>}
+            {day.auto_filled && <span className="chip">Repetição semanal</span>}
             {day.moved_from && <span className="chip">Veio do dia {dayOfMonth(day.moved_from)}</span>}
           </div>
           {st === 'recover' && <p className="small" style={{ color: 'var(--ink-2)' }}>Este dia já passou sem treino. Muda-o para hoje ou para um dia livre deste mês e treina nesse dia. Se não o recuperares, conta como falha no fecho do mês.</p>}
           {canChange && (
             <label className="field">
               <span>Treino para este dia</span>
-              <select className="select" value={day.plan_id ?? ''} onChange={(e) => run(() => api.updatePlannedDay(day.id, { plan_id: e.target.value || null }), 'Treino atualizado')}>
+              <select className="select big" value={day.plan_id ?? ''} onChange={(e) => run(() => api.updatePlannedDay(day.id, { plan_id: e.target.value || null }), 'Treino atualizado')}>
                 <option value="">Escolho na hora</option>
                 {snap.plans.filter((p) => !p.owner_id || p.owner_id === me.id).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>

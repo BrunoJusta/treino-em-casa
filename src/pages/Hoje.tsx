@@ -148,7 +148,7 @@ export function Hoje() {
           <CalendarPlus size={28} weight="bold" color="var(--accent-text)" />
           <div className="grow">
             <p className="strong">Planeia {monthName(mk)}</p>
-            <p className="small" style={{ color: 'var(--ink-2)' }}>{inWindow ? `Até dia ${snap.settings.plan_window_end_day}. Depois a app completa sozinha as semanas que faltam.` : 'Há semanas com menos de 2 dias marcados.'}</p>
+            <p className="small" style={{ color: 'var(--ink-2)' }}>{`Há semanas com menos de ${me.min_days_week} dias marcados. Marca-os no Calendário${inWindow ? `, de preferência até dia ${snap.settings.plan_window_end_day}` : ''}.`}</p>
           </div>
           <CaretRight size={20} />
         </Link>

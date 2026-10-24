@@ -4,15 +4,15 @@ import { CheckCircle, Repeat, WarningCircle } from '@phosphor-icons/react'
 import { useApp } from '../data/store'
 import { api } from '../lib/config'
 import { DayActions, STATE_LABEL } from '../components/DayActions'
-import { cmp, dayOfMonth, longDate, monthDays, monthKey, monthName, prevMonth, WEEKDAY_ABBR, WEEKDAY_SHORT, weekday } from '../lib/dates'
-import { canUnmark, checkMonthWeeks, monthRequirement, repeatPattern } from '../lib/rules/planning'
+import { cmp, dayOfMonth, longDate, monthDays, monthKey, monthName, nextMonth, prevMonth, WEEKDAY_ABBR, WEEKDAY_SHORT, weekday, weekStart } from '../lib/dates'
+import { checkMonthWeeks, monthRequirement, repeatDates, repeatPattern } from '../lib/rules/planning'
+import { Switch } from '../components/ui'
 import { sfx, vibrate } from '../lib/fx'
-import type { PlannedDay } from '../data/types'
 
 /** O meu calendário: marcar, eliminar e mudar dias, e escolher o treino de cada dia. Vive dentro do Calendário. */
 export function MyPlanner({ mk }: { mk: string }) {
-  const { snap, me, today, run, stateOf, closedMonths } = useApp()
-  const [open, setOpen] = useState<PlannedDay | null>(null)
+  const { snap, me, today, run, stateOf, toast } = useApp()
+  const [openDate, setOpenDate] = useState<string | null>(null)
   const mine = snap.plannedDays.filter((d) => d.profile_id === me.id)
   const monthMine = mine.filter((d) => monthKey(d.date) === mk)
   const marked = monthMine.map((d) => d.date)
@@ -23,20 +23,30 @@ export function MyPlanner({ mk }: { mk: string }) {
   const prevDays = mine.filter((d) => monthKey(d.date) === prevMonth(mk)).map((d) => d.date)
   const plans = snap.plans.filter((p) => !p.owner_id || p.owner_id === me.id)
 
+  // tocar num dia livre marca-o e abre logo as opções (para escolher o treino); tocar num dia marcado abre as opções
   const toggle = async (d: string) => {
     sfx.tap()
     vibrate(10)
     const ex = monthMine.find((x) => x.date === d)
-    if (ex) {
-      // tocar num dia marcado tira-o logo, se a semana continuar com o mínimo; senão abre as opções
-      const ctx = { today, days: mine, sessions: snap.sessions, excuses: snap.excuses, closedMonths, minPerWeek: me.min_days_week }
-      if (canUnmark(ex, ctx).ok && (stateOf(ex) === 'planned' || stateOf(ex) === 'today')) {
-        await run(() => api.removePlannedDay(ex.id), `Dia ${dayOfMonth(d)} eliminado`)
-      } else setOpen(ex)
-      return
+    if (!ex) {
+      if (cmp(d, today) < 0) return
+      await run(() => api.addPlannedDays(me.id, [{ date: d, plan_id: null }]), `Dia ${dayOfMonth(d)} marcado`)
     }
-    if (cmp(d, today) < 0) return
-    await run(() => api.addPlannedDays(me.id, [{ date: d, plan_id: null }]))
+    setOpenDate(d)
+  }
+
+  const pattern = me.repeat_weekly ?? null
+  const enableRepeat = async () => {
+    // semana de origem: a primeira semana, de hoje em diante, que já tem dias marcados
+    const future = mine.filter((d) => cmp(d.date, today) >= 0).sort((x, y) => cmp(x.date, y.date))
+    if (!future.length) { toast('Marca primeiro os dias de uma semana (e o treino de cada um).', 'error'); return }
+    const ws = weekStart(future[0].date)
+    const src = future.filter((d) => weekStart(d.date) === ws)
+    const pat = src.map((d) => ({ wd: weekday(d.date), plan_id: d.plan_id }))
+    const months = [...new Set([monthKey(today), nextMonth(monthKey(today)), mk])].filter((m) => cmp(m, monthKey(today)) >= 0)
+    const taken = mine.map((d) => d.date)
+    const fill = months.flatMap((m) => repeatDates(m, today, pat, taken))
+    await run(() => api.setRepeatWeekly(me.id, pat, fill, months), fill.length ? `${fill.length} dias marcados até ao fim de ${monthName(months.at(-1)!)}` : 'Repetição ligada')
   }
 
   const repeat = async () => {
@@ -56,13 +66,13 @@ export function MyPlanner({ mk }: { mk: string }) {
         <div className="grow">
           <p className="strong num">{marked.length} dias marcados, mínimo {required}</p>
           <p className="small" style={{ color: 'var(--ink-2)' }}>
-            {allOk ? 'Todas as semanas têm o mínimo. Podes mudar os dias quando quiseres, dentro do mês.' : `Pelo menos ${me.min_days_week} dias por semana (1 nas semanas cortadas). Planeia até dia ${snap.settings.plan_window_end_day}; depois a app completa o que faltar.`}
+            {allOk ? 'Todas as semanas têm o mínimo. Podes mudar os dias quando quiseres, dentro do mês.' : `Pelo menos ${me.min_days_week} dias por semana (1 nas semanas cortadas). Podes marcar mais dias à vontade.`}
           </p>
         </div>
       </div>
 
       <section className="stack-sm" aria-label={`Dias de ${monthName(mk)}`}>
-        <p className="small muted">Toca num dia para o marcar. Toca outra vez para o eliminar. Nos dias que já passaram, tocar abre as opções.</p>
+        <p className="small muted">Toca num dia para o marcar e escolher o treino. Toca num dia marcado para o mudar ou eliminar. Podes marcar quantos dias quiseres.</p>
         <div className="cal" style={{ gap: 6 }}>
           {WEEKDAY_SHORT.map((w, i) => <div key={i} className="cal-head">{w}</div>)}
           {Array.from({ length: weekday(days[0]) }, (_, i) => <div key={`e${i}`} />)}
@@ -72,7 +82,7 @@ export function MyPlanner({ mk }: { mk: string }) {
             const locked = !pd && cmp(d, today) < 0
             const cls = st ? (st === 'planned' || st === 'today' ? `on ${pd!.auto_filled ? 'auto' : ''}` : st) : ''
             return (
-              <button key={d} className={`plan-day ${cls} ${locked ? 'locked' : ''} ${d === today ? 'today' : ''}`} onClick={() => toggle(d)} disabled={locked} aria-label={`${longDate(d)}: ${st ? STATE_LABEL[st] + (pd!.auto_filled ? ', preenchido pela app' : '') : locked ? 'já passou' : 'livre, tocar para marcar'}`}>
+              <button key={d} className={`plan-day ${cls} ${locked ? 'locked' : ''} ${d === today ? 'today' : ''}`} onClick={() => toggle(d)} disabled={locked} aria-label={`${longDate(d)}: ${st ? STATE_LABEL[st] + (pd!.auto_filled ? ', repetição semanal' : '') : locked ? 'já passou' : 'livre, tocar para marcar'}`}>
                 {dayOfMonth(d)}
               </button>
             )
@@ -87,6 +97,20 @@ export function MyPlanner({ mk }: { mk: string }) {
             <span className={`chip ${w.ok ? 'ok' : 'warn'} num`}>{w.count}/{w.required}</span>
           </div>
         ))}
+      </section>
+
+      <section className="card stack-sm">
+        <label className="row between">
+          <span>
+            <span className="strong row-sm"><Repeat size={18} weight="bold" /> Repetir todas as semanas</span>
+            <span className="small" style={{ color: 'var(--ink-2)' }}>
+              {pattern?.length
+                ? `Todas as semanas: ${pattern.map((x) => `${WEEKDAY_ABBR[x.wd]}${x.plan_id ? ` (${snap.plans.find((pl) => pl.id === x.plan_id)?.name ?? 'treino'})` : ''}`).join(', ')}. Os meses seguintes são marcados no dia 1.`
+                : 'Marca os dias de uma semana (e o treino de cada um) e liga isto para a app os repetir nas semanas seguintes.'}
+            </span>
+          </span>
+          <Switch checked={!!pattern?.length} onChange={(v) => void (v ? enableRepeat() : run(() => api.setRepeatWeekly(me.id, null, [], []), 'Repetição desligada'))} label="Repetir todas as semanas" />
+        </label>
       </section>
 
       {prevDays.length > 0 && marked.length < required && (
@@ -113,7 +137,7 @@ export function MyPlanner({ mk }: { mk: string }) {
           </div>
         </section>
       )}
-      <DayActions day={open} onClose={() => setOpen(null)} />
+      <DayActions day={openDate ? monthMine.find((x) => x.date === openDate) ?? null : null} onClose={() => setOpenDate(null)} />
     </>
   )
 }

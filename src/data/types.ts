@@ -14,6 +14,8 @@ export interface Profile {
   active: boolean
   restrictions: string[]
   voice_enabled: boolean
+  // Repetir todas as semanas: dias da semana (0 = segunda) e o treino de cada um. null = não repete.
+  repeat_weekly?: { wd: number; plan_id: string | null }[] | null
   created_at: string
 }
 

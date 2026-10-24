@@ -139,3 +139,14 @@ export function isPlanningWindow(today: string, windowEndDay: number): boolean {
 }
 
 export { prevMonth, addDays }
+
+/** Dias a marcar para repetir o padrão semanal num mês, de hoje em diante, sem repetir os que já estão marcados. */
+export function repeatDates(mk: string, today: string, pattern: { wd: number; plan_id: string | null }[], marked: string[]) {
+  const set = new Set(marked)
+  return monthDays(mk)
+    .filter((d) => cmp(d, today) >= 0 && !set.has(d))
+    .flatMap((d) => {
+      const p = pattern.find((x) => x.wd === weekday(d))
+      return p ? [{ date: d, plan_id: p.plan_id }] : []
+    })
+}
