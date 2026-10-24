@@ -16,6 +16,11 @@ import { api, isDemo } from '../lib/config'
 import { names } from '../lib/format'
 import { addDays } from '../lib/dates'
 
+function isNight() {
+  const h = hourLisbon()
+  return h < 7 || h >= 20
+}
+
 function greeting() {
   const h = hourLisbon()
   if (h < 6) return 'Boa noite'
@@ -105,9 +110,10 @@ export function Hoje() {
   return (
     <main className="page">
       <header className="row">
-        <div className="grow">
-          <h1 style={{ fontSize: 24 }}>{greeting()}, {me.display_name}</h1>
-          <p className="small muted">{longDate(today)}</p>
+        <span className="icon-btn" aria-hidden style={{ background: 'var(--surface)', borderColor: 'transparent' }}><PixelIcon name={isNight() ? 'moon' : 'sun'} size={26} /></span>
+        <div className="grow" style={{ minWidth: 0 }}>
+          <h1 style={{ fontSize: 21, lineHeight: 1.15 }}>{greeting()}</h1>
+          <p className="small muted" style={{ marginTop: 1 }}>{longDate(today)}</p>
         </div>
         {isAdmin && <Link to="/admin" className="icon-btn" aria-label="Backoffice"><GearSix size={22} weight="bold" /></Link>}
         <ProfileLink />
