@@ -16,7 +16,7 @@ import { api, isDemo } from '../lib/config'
 import { names } from '../lib/format'
 import { addDays } from '../lib/dates'
 import { EGG_STYLE, nextQuote, type EggKind, type Quote } from '../lib/quotes'
-import { Ear, Egg, HandFist, Lightning, Radio, Sparkle, Waves, Wind } from '@phosphor-icons/react'
+import { ArrowFatLinesUp, Carrot, Circle, DiceFive, Dog, Ear, Egg, HandFist, Lamp, Lightning, Moon, Radio, ShieldStar, SoccerBall, Sparkle, Sword, TreeEvergreen, Waves, Wind } from '@phosphor-icons/react'
 import { sfx } from '../lib/fx'
 
 function isNight() {
@@ -252,5 +252,16 @@ function EggIcon({ kind }: { kind: EggKind }) {
     case 'disney': return <Sparkle {...p} />
     case 'shrek': return <Ear {...p} />
     case 'percy': return <Waves {...p} weight="bold" />
+    case 'mcu': return <ShieldStar {...p} />
+    case 'looney': return <Carrot {...p} />
+    case 'tedlasso': return <SoccerBall {...p} />
+    case 'wakfu': return <Circle {...p} weight="bold" />
+    case 'bluey': return <Dog {...p} />
+    case 'adventure': return <Sword {...p} />
+    case 'gardenwall': return <Lamp {...p} />
+    case 'gravityfalls': return <TreeEvergreen {...p} />
+    case 'mha': return <ArrowFatLinesUp {...p} />
+    case 'voxmachina': return <DiceFive {...p} />
+    case 'batman': return <Moon {...p} />
   }
 }

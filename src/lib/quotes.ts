@@ -1,10 +1,11 @@
 // Frases que o Jarro diz quando lhe tocam no ecrã Hoje.
-// 200 frases: estoicos, poetas, filósofos e escritores (incluindo portugueses),
+// Frases: estoicos, poetas, filósofos e escritores (incluindo portugueses),
 // mais easter eggs de jogos, séries e filmes, cada um com o seu balão.
 // Traduções livres para pt-PT. Algumas frases célebres têm a autoria contestada;
 // nesses casos fica o nome a quem a frase é habitualmente atribuída.
 
 export type EggKind = 'pewdiepie' | 'pokemon' | 'digimon' | 'avatar' | 'hazbin' | 'disney' | 'shrek' | 'percy'
+  | 'mcu' | 'looney' | 'tedlasso' | 'wakfu' | 'bluey' | 'adventure' | 'gardenwall' | 'gravityfalls' | 'mha' | 'voxmachina' | 'batman'
 
 export interface Quote {
   text: string
@@ -284,6 +285,45 @@ const EGGS: Quote[] = [
     'Os monstros não esperam que estejas pronto. Treina antes.',
     'Heróis não são invencíveis. São os que aparecem quando é preciso.',
   ),
+  ...egg('mcu', 'Capitão América', 'Consigo fazer isto o dia todo.'),
+  ...egg('mcu', 'Tony Stark', 'Parte da viagem é o fim.', 'Se não és nada sem o fato, então não o devias ter.'),
+  ...egg('mcu', 'Frigga, Vingadores: Endgame', 'Toda a gente falha em ser quem devia ser. A medida de um herói é o quão bem consegue ser quem é.'),
+  ...egg('mcu', 'A Anciã, Doutor Estranho', 'Nunca chegaste a ser o melhor por amor ao sucesso, mas por medo de falhar.'),
+  ...egg('mcu', "T'Challa, Black Panther", 'Em tempos de crise, os sábios constroem pontes e os tolos constroem muros.'),
+  ...egg('mcu', 'Vision, WandaVision', 'O que é o luto, se não o amor que persiste?'),
+  ...egg('looney', 'Bugs Bunny', 'Não leves a vida demasiado a sério. Nunca vais sair dela vivo!'),
+  ...egg('tedlasso', 'Ted Lasso',
+    'Acredito na esperança. Acredito no "Believe".',
+    'Sabes qual é o animal mais feliz do mundo? O peixinho dourado. Tem uma memória de 10 segundos. Sê um peixinho dourado.',
+    'Sê curioso, não julgues.',
+    'Para mim, o sucesso não são as vitórias e as derrotas. É ajudar estes rapazes a serem a melhor versão de si mesmos, dentro e fora do campo.',
+    'Acredito em fantasmas. Mas, mais importante, acredito que eles precisam de acreditar em si mesmos.',
+  ),
+  ...egg('wakfu', 'Tristepin, Wakfu', 'Vamos tornar-nos lendas, Yugo.'),
+  ...egg('bluey', 'Bandit, Bluey', 'Os obstáculos não bloqueiam o caminho. São o caminho.'),
+  ...egg('bluey', 'Avó de Bluey', 'Continua a praticar, vais ficar melhor. Só nunca desistas.'),
+  ...egg('bluey', 'Bluey', 'Tens de ser o mais corajoso que alguma vez foste.'),
+  ...egg('bluey', 'Chilli, Bluey', 'Faz a tua própria corrida.', 'Lembra-te: vou estar sempre aqui para ti, mesmo que não me vejas, porque gosto de ti.'),
+  ...egg('adventure', 'Jake, Hora de Aventuras', 'Ser mau numa coisa é o primeiro passo para seres mais ou menos bom nela.'),
+  ...egg('adventure', 'Duque das Nozes, Hora de Aventuras', 'Está tudo bem. Toda a gente comete erros. Faz parte de crescer, e nunca se deixa de crescer.'),
+  ...egg('adventure', 'Princesa Bubblegum, Hora de Aventuras', 'Cada pessoa é feita de maneira diferente. Não precisamos de perceber, só de respeitar.'),
+  ...egg('gardenwall', 'Beatrice, Over the Garden Wall', 'Wirt, às vezes tens de enfrentar os teus problemas.'),
+  ...egg('gardenwall', 'Greg, Over the Garden Wall', 'Desistir? Eu nunca vou desistir!', 'Wirt, consegues fazer tudo se puseres isso na cabeça.'),
+  ...egg('gravityfalls', 'Ford Pines, Gravity Falls', 'Ser herói é lutar mesmo quando parece impossível.'),
+  ...egg('gravityfalls', 'Wendy, Gravity Falls', 'Está na hora de pararmos de tentar ser tão "perfeitos" e sermos quem realmente somos.'),
+  ...egg('mha', 'All Might',
+    'Já está tudo bem. Porquê? Porque eu estou aqui!',
+    'Ganhes ou percas, sais sempre a ganhar se aprenderes com a experiência.',
+    'Vai mais além! PLUS ULTRA!',
+    'Tu podes ser um herói!',
+  ),
+  ...egg('mha', 'Deku', 'Não te preocupes com o que os outros pensam. Levanta a cabeça e segue em frente.', 'Já não sou o Deku inútil que não faz nada bem. Sou o Deku que dá tudo.'),
+  ...egg('voxmachina', 'Percy, Vox Machina', 'Acho que somos pessoas muito partidas, mas juntos somos muito mais do que a soma das partes.'),
+  ...egg('voxmachina', 'Keyleth, Vox Machina', 'Brindo a celebrar o fim do mundo com os melhores amigos que podíamos ter.'),
+  ...egg('voxmachina', "Vax'ildan, Vox Machina", 'Não sei porque estamos a fazer isto. Não sei porque ando com esta gente. E adoro esta gente.'),
+  ...egg('batman', 'Thomas Wayne, Batman Begins', 'Porque é que caímos, Bruce? Para aprendermos a levantar-nos.'),
+  ...egg('batman', 'Batman, Batman Begins', 'Não é quem sou por dentro, é o que faço que me define.'),
+  ...egg('batman', 'Harvey Dent, O Cavaleiro das Trevas', 'A noite é mais escura logo antes do amanhecer.'),
 ]
 
 export const QUOTES: Quote[] = [...STOICS, ...PORTUGUESES, ...CLASSICOS, ...POETAS_E_ESCRITORES, ...OUTROS, ...EGGS]
@@ -298,6 +338,17 @@ export const EGG_STYLE: Record<EggKind, { label: string; bg: string; line: strin
   disney: { label: 'Disney', bg: '#eef0ff', line: '#5b5fd6', ink: '#1c1f5c', sub: '#5b5fd6' },
   shrek: { label: 'Pântano', bg: '#eef6d8', line: '#7a9a1f', ink: '#2f3d06', sub: '#5d7a12' },
   percy: { label: 'Meio-Sangue', bg: '#e2f4fb', line: '#1f7fa8', ink: '#0b3446', sub: '#e0a100' },
+  mcu: { label: 'Marvel', bg: '#fff0ef', line: '#c8102e', ink: '#3d0710', sub: '#a8780a' },
+  looney: { label: 'Looney Tunes', bg: '#fff3e0', line: '#e86f0c', ink: '#3d2000', sub: '#b35200' },
+  tedlasso: { label: 'Ted Lasso', bg: '#fff9d6', line: '#1d3f8f', ink: '#14295e', sub: '#1d3f8f' },
+  wakfu: { label: 'Wakfu', bg: '#e6fbf8', line: '#16a6a0', ink: '#073f3c', sub: '#0f7f7a' },
+  bluey: { label: 'Bluey', bg: '#e8f1ff', line: '#3f74d6', ink: '#13295a', sub: '#d9822b' },
+  adventure: { label: 'Hora de Aventuras', bg: '#e7f8ff', line: '#f2b705', ink: '#173a52', sub: '#0e7ab8' },
+  gardenwall: { label: 'Over the Garden Wall', bg: '#f6eee2', line: '#8a5a2b', ink: '#3a2412', sub: '#b06a1f' },
+  gravityfalls: { label: 'Gravity Falls', bg: '#eef5ea', line: '#2f6b3a', ink: '#17331c', sub: '#b88a1a' },
+  mha: { label: 'My Hero Academia', bg: '#eef4ff', line: '#1f5fd1', ink: '#0d2557', sub: '#d72c2c' },
+  voxmachina: { label: 'Vox Machina', bg: '#f3edfb', line: '#6b3fa0', ink: '#2a1245', sub: '#9c6a12' },
+  batman: { label: 'Gotham', bg: '#1b1e27', line: '#f2c230', ink: '#f3f4f8', sub: '#f2c230' },
 }
 
 const BAG_KEY = 'tec-quote-bag-v2'
