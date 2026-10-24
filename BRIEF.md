@@ -59,7 +59,7 @@ Resumo, desculpas, pessoas (criar, editar, foto, código novo), material, exerc�
 
 ## 7. Gamificação
 
-XP por treino, semana cumprida, planear a tempo, aplausos e treino a dois. Níveis Caracol → Aquecido → Assíduo → Ferro → Aço → Lenda da Casa. 15 conquistas (3 da família). Meta mensal da família com prémio. Confetes, sons chiptune e vibração nos momentos de festa.
+XP por treino, semana cumprida, planear a tempo, aplausos e treino a dois. Níveis Caracol → Novato → Proficiente → Experiente → Mestre → Lenda. 15 conquistas (3 da família). Meta mensal da família com prémio. Confetes, sons chiptune e vibração nos momentos de festa.
 
 ## 8. Fora desta versão
 

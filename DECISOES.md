@@ -51,7 +51,7 @@ Registo das decisões fechadas com o Bruno antes de construir. Quando uma regra 
 ## Gamificação
 
 - XP: dia marcado feito 50, treino extra 30, treino guiado completo +20, semana cumprida +50, mês planeado a tempo 30, aplauso 2 (máx. 10 por dia), treino a dois +10.
-- Níveis: Caracol → Aquecido → Assíduo → Ferro → Aço → Lenda da Casa.
+- Níveis: Caracol → Novato → Proficiente → Experiente → Mestre → Lenda.
 - Streak de semanas cumpridas, com escudo a cada 4 semanas seguidas.
 - Ranking por consistência (dias marcados cumpridos), desempate pelo número de treinos feitos.
 - Badges individuais e da família, meta mensal da família e feed com reações.

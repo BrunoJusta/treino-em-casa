@@ -14,11 +14,11 @@ export const XP = {
 
 export const LEVELS = [
   { name: 'Caracol', min: 0 },
-  { name: 'Aquecido', min: 300 },
-  { name: 'Assíduo', min: 1200 },
-  { name: 'Ferro', min: 3000 },
-  { name: 'Aço', min: 6000 },
-  { name: 'Lenda da Casa', min: 10000 },
+  { name: 'Novato', min: 300 },
+  { name: 'Proficiente', min: 1200 },
+  { name: 'Experiente', min: 3000 },
+  { name: 'Mestre', min: 6000 },
+  { name: 'Lenda', min: 10000 },
 ]
 
 export function levelFor(xp: number) {
