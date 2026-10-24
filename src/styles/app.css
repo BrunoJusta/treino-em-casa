@@ -46,7 +46,11 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); }
-body { min-height: 100dvh; overscroll-behavior-y: none; }
+/* iOS 26: com o documento a fazer scroll, o Safari deixava um espaço vazio por baixo da barra fixa.
+   O scroll passa a ser feito pelo #root, que ocupa o ecrã todo. */
+html, body { height: 100%; overflow: hidden; }
+body { overscroll-behavior-y: none; }
+#root { height: 100%; overflow-y: auto; overscroll-behavior-y: none; -webkit-overflow-scrolling: touch; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button, a, input, select { touch-action: manipulation; }
 button { cursor: pointer; }
@@ -316,3 +320,11 @@ button.cal-day { cursor: pointer; }
   .app.wide { max-width: 1080px; }
   .app.wide .page { padding-left: 32px; padding-right: 32px; }
 }
+
+/* ---------- Jarro que fala (Hoje) ---------- */
+.jar-tap { background: none; border: 0; padding: 0; cursor: pointer; flex-shrink: 0; border-radius: 14px; touch-action: manipulation; }
+.jar-tap:focus-visible { outline: 3px solid var(--accent-text); outline-offset: 3px; }
+.jar-quote { position: relative; width: 100%; text-align: left; border: 1px solid var(--accent-line); background: var(--accent-soft); color: var(--ink); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font: inherit; cursor: pointer; }
+.jar-quote::before { content: ''; position: absolute; top: -8px; left: 34px; width: 14px; height: 14px; background: var(--accent-soft); border-left: 1px solid var(--accent-line); border-top: 1px solid var(--accent-line); transform: rotate(45deg); }
+.jar-quote-text { font-size: 16px; font-weight: 600; line-height: 1.35; text-wrap: pretty; }
+.jar-quote-author { font-size: 13px; color: var(--muted); font-weight: 600; }

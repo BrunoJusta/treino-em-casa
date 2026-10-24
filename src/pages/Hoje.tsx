@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { CaretRight, Camera, GearSix, Play, CalendarPlus, Warning } from '@phosphor-icons/react'
@@ -15,6 +15,8 @@ import { euros } from '../lib/rules/jar'
 import { api, isDemo } from '../lib/config'
 import { names } from '../lib/format'
 import { addDays } from '../lib/dates'
+import { nextQuote, type Quote } from '../lib/quotes'
+import { sfx } from '../lib/fx'
 
 function isNight() {
   const h = hourLisbon()
@@ -180,14 +182,7 @@ export function Hoje() {
         </Link>
       </section>
 
-      <Link to="/jarro" className="card tap" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: 14, alignItems: 'center' }}>
-        <JarMascot mood={mood} level={Math.min(1, fam.jar.potential / Math.max(1, snap.settings.goal_cents))} size={62} />
-        <div className="grow stack-sm">
-          <div className="row between"><span className="strong">Meta da família</span><span className="small num muted">{fam.goal.done}/{fam.goal.target} treinos</span></div>
-          <Bar value={fam.goal.done / Math.max(1, fam.goal.target)} tone="pixel" label="Meta da família" />
-          <p className="tiny muted">Jarro: {euros(fam.jar.balance)} {fam.jar.owed ? `(+ ${euros(fam.jar.owed)} por pagar)` : ''} para {snap.settings.goal_name}</p>
-        </div>
-      </Link>
+      <JarCard mood={mood} level={Math.min(1, fam.jar.potential / Math.max(1, snap.settings.goal_cents))} done={fam.goal.done} target={fam.goal.target} balance={fam.jar.balance} owed={fam.jar.owed} goalName={snap.settings.goal_name} />
 
       <section className="stack">
         <div className="section-title"><h2>Hoje lá em baixo</h2><Link to="/familia" className="small strong">Ver tudo</Link></div>
@@ -201,5 +196,44 @@ export function Hoje() {
         )}
       </section>
     </main>
+  )
+}
+
+// O jarro da página inicial: tocar nele dá uma frase motivacional ou estoica.
+function JarCard({ mood, level, done, target, balance, owed, goalName }: { mood: 'party' | 'sad' | 'happy'; level: number; done: number; target: number; balance: number; owed: number; goalName: string }) {
+  const [quote, setQuote] = useState<Quote | null>(null)
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    if (!quote) return
+    const t = setTimeout(() => setQuote(null), 9000)
+    return () => clearTimeout(t)
+  }, [quote, n])
+  const speak = () => { sfx.tap(); setQuote(nextQuote()); setN((x) => x + 1) }
+  return (
+    <section className="stack-sm">
+      <div className="card" style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+        <motion.button type="button" className="jar-tap" onClick={speak} aria-label="Tocar no jarro para uma frase" whileTap={{ scale: 0.9, rotate: -6 }}>
+          <JarMascot mood={quote ? 'wow' : mood} level={level} size={62} />
+        </motion.button>
+        <Link to="/jarro" className="grow stack-sm" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <div className="row between"><span className="strong">Meta da família</span><span className="small num muted">{done}/{target} treinos</span></div>
+          <Bar value={done / Math.max(1, target)} tone="pixel" label="Meta da família" />
+          <p className="tiny muted">Jarro: {euros(balance)} {owed ? `(+ ${euros(owed)} por pagar)` : ''} para {goalName}</p>
+        </Link>
+      </div>
+      <div aria-live="polite">
+        <AnimatePresence mode="wait">
+          {quote ? (
+            <motion.button type="button" key={n} className="jar-quote" onClick={() => setQuote(null)} aria-label="Fechar frase"
+              initial={{ opacity: 0, y: -8, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.25 }}>
+              <span className="jar-quote-text">{quote.text}</span>
+              {quote.author && <span className="jar-quote-author">{quote.author}</span>}
+            </motion.button>
+          ) : (
+            <motion.p key="hint" className="tiny muted" style={{ paddingLeft: 4 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>Toca no jarro para uma frase do dia.</motion.p>
+          )}
+        </AnimatePresence>
+      </div>
+    </section>
   )
 }
