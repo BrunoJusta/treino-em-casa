@@ -357,3 +357,11 @@ button.cal-day { cursor: pointer; }
 .egg-mha .jar-quote-text { font-weight: 800; }
 .egg-voxmachina { background-image: radial-gradient(circle at 92% 22%, rgba(156, 106, 18, 0.35) 0 2px, transparent 3px), radial-gradient(circle at 86% 64%, rgba(156, 106, 18, 0.3) 0 2px, transparent 3px), radial-gradient(circle at 96% 80%, rgba(156, 106, 18, 0.3) 0 1.5px, transparent 2.5px); }
 .egg-batman { background-image: radial-gradient(circle at 90% 30%, rgba(242, 194, 48, 0.22) 0 18px, transparent 19px); }
+.egg-ladybug { background-image: radial-gradient(circle at 96% 18%, #1d1d22 0 5px, transparent 6px), radial-gradient(circle at 92% 82%, #1d1d22 0 4px, transparent 5px), radial-gradient(circle at 98% 55%, #1d1d22 0 3px, transparent 4px); }
+.egg-scottpilgrim { background-image: linear-gradient(90deg, #e4419a 0 33%, #7a3fd0 33% 66%, #39c2ef 66% 100%); background-size: 100% 4px; background-repeat: no-repeat; background-position: bottom; }
+.egg-scottpilgrim .jar-quote-text { font-weight: 800; }
+.egg-monsterrancher { background-image: radial-gradient(circle at 92% 50%, rgba(90, 154, 43, 0.12) 0 4px, transparent 5px, transparent 10px, rgba(90, 154, 43, 0.22) 11px, rgba(90, 154, 43, 0.22) 22px, transparent 23px); }
+.egg-spiderman { background-image: repeating-conic-gradient(from 0deg at 100% 0%, rgba(200, 16, 46, 0.14) 0 2deg, transparent 2deg 15deg), repeating-radial-gradient(circle at 100% 0%, transparent 0 14px, rgba(200, 16, 46, 0.12) 14px 15px); }
+.egg-hadestown { background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 7px); }
+.egg-hadestown .jar-quote-text { font-style: italic; }
+.egg-hungergames { background-image: radial-gradient(ellipse at 100% 100%, rgba(255, 138, 61, 0.35) 0 30px, transparent 60px); }

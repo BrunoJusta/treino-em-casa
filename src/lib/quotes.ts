@@ -6,6 +6,7 @@
 
 export type EggKind = 'pewdiepie' | 'pokemon' | 'digimon' | 'avatar' | 'hazbin' | 'disney' | 'shrek' | 'percy'
   | 'mcu' | 'looney' | 'tedlasso' | 'wakfu' | 'bluey' | 'adventure' | 'gardenwall' | 'gravityfalls' | 'mha' | 'voxmachina' | 'batman'
+  | 'ladybug' | 'scottpilgrim' | 'monsterrancher' | 'spiderman' | 'hadestown' | 'hungergames'
 
 export interface Quote {
   text: string
@@ -324,6 +325,21 @@ const EGGS: Quote[] = [
   ...egg('batman', 'Thomas Wayne, Batman Begins', 'Porque é que caímos, Bruce? Para aprendermos a levantar-nos.'),
   ...egg('batman', 'Batman, Batman Begins', 'Não é quem sou por dentro, é o que faço que me define.'),
   ...egg('batman', 'Harvey Dent, O Cavaleiro das Trevas', 'A noite é mais escura logo antes do amanhecer.'),
+  ...egg('ladybug', 'Ladybug, Miraculous', 'Para garantir que o poder é usado para o bem maior, tem de ser partilhado.', 'Aconteça o que acontecer, vamos estar prontos.'),
+  ...egg('ladybug', 'Marinette, Miraculous', 'Não há vencedores nem vencidos! Há só pessoas, cada uma com as suas diferenças.', 'Podes tropeçar, podes cair, e vai haver sempre alguém para te ajudar a levantar.'),
+  ...egg('scottpilgrim', 'Wallace Wells, Scott Pilgrim', 'Se queres muito uma coisa, tens de lutar por ela. Sobe o teu nível, Scott.'),
+  ...egg('scottpilgrim', 'Ramona Flowers, Scott Pilgrim', 'Todos temos bagagem.'),
+  ...egg('scottpilgrim', 'Scott Pilgrim contra o Mundo', 'Scott Pilgrim ganhou o Poder do Amor-Próprio!'),
+  ...egg('monsterrancher', 'Pixie, Monster Rancher', 'Não recebo ordens de ninguém! Só luto por aquilo em que acredito!'),
+  ...egg('spiderman', 'Tio Ben, Homem-Aranha', 'Com um grande poder vem uma grande responsabilidade.'),
+  ...egg('spiderman', 'Tia May, Homem-Aranha 2', 'Acredito que há um herói em todos nós, que nos mantém honestos, nos dá força e nos torna nobres.'),
+  ...egg('spiderman', 'Peter B. Parker, Homem-Aranha: No Universo Aranha', 'É só isso, Miles. Um salto de fé.'),
+  ...egg('spiderman', 'Miles Morales, Homem-Aranha: No Universo Aranha', 'Qualquer um pode usar a máscara. Tu podes usar a máscara.'),
+  ...egg('hadestown', 'Anaïs Mitchell, criadora de Hadestown', 'O Orfeu é um herói não porque consegue, mas porque tenta!', 'Há beleza na luta por um mundo melhor, mesmo que ainda não consigamos ver o resultado.'),
+  ...egg('hungergames', 'Presidente Snow, Os Jogos da Fome', 'Esperança. É a única coisa mais forte do que o medo.'),
+  ...egg('hungergames', 'Effie Trinket, Os Jogos da Fome', 'Que a sorte esteja sempre do vosso lado!'),
+  ...egg('hungergames', 'Haymitch, Os Jogos da Fome: Em Chamas', 'Lembra-te de quem é o verdadeiro inimigo.'),
+  ...egg('hungergames', 'Katniss, Os Jogos da Fome: A Revolta', 'Se nós ardermos, vocês ardem connosco!'),
 ]
 
 export const QUOTES: Quote[] = [...STOICS, ...PORTUGUESES, ...CLASSICOS, ...POETAS_E_ESCRITORES, ...OUTROS, ...EGGS]
@@ -348,6 +364,12 @@ export const EGG_STYLE: Record<EggKind, { label: string; bg: string; line: strin
   gravityfalls: { label: 'Gravity Falls', bg: '#eef5ea', line: '#2f6b3a', ink: '#17331c', sub: '#b88a1a' },
   mha: { label: 'My Hero Academia', bg: '#eef4ff', line: '#1f5fd1', ink: '#0d2557', sub: '#d72c2c' },
   voxmachina: { label: 'Vox Machina', bg: '#f3edfb', line: '#6b3fa0', ink: '#2a1245', sub: '#9c6a12' },
+  ladybug: { label: 'Miraculous', bg: '#ffecec', line: '#d61f2c', ink: '#3d0709', sub: '#1d1d22' },
+  scottpilgrim: { label: 'Scott Pilgrim', bg: '#fff0f7', line: '#e4419a', ink: '#3a0d26', sub: '#7a3fd0' },
+  monsterrancher: { label: 'Monster Rancher', bg: '#f0f7e8', line: '#5a9a2b', ink: '#22380e', sub: '#c0661a' },
+  spiderman: { label: 'Homem-Aranha', bg: '#fff0f0', line: '#c8102e', ink: '#2a0a10', sub: '#1d4fa8' },
+  hadestown: { label: 'Hadestown', bg: '#141414', line: '#d2232a', ink: '#ffffff', sub: '#ff4d55' },
+  hungergames: { label: 'Panem', bg: '#1f1a14', line: '#e0a100', ink: '#fbf3e2', sub: '#ff8a3d' },
   batman: { label: 'Gotham', bg: '#1b1e27', line: '#f2c230', ink: '#f3f4f8', sub: '#f2c230' },
 }
 

@@ -16,7 +16,7 @@ import { api, isDemo } from '../lib/config'
 import { names } from '../lib/format'
 import { addDays } from '../lib/dates'
 import { EGG_STYLE, nextQuote, type EggKind, type Quote } from '../lib/quotes'
-import { ArrowFatLinesUp, Carrot, Circle, DiceFive, Dog, Ear, Egg, HandFist, Lamp, Lightning, Moon, Radio, ShieldStar, SoccerBall, Sparkle, Sword, TreeEvergreen, Waves, Wind } from '@phosphor-icons/react'
+import { ArrowFatLinesUp, BugBeetle, Disc, Fire, Flower, GameController, Spiral, Carrot, Circle, DiceFive, Dog, Ear, Egg, HandFist, Lamp, Lightning, Moon, Radio, ShieldStar, SoccerBall, Sparkle, Sword, TreeEvergreen, Waves, Wind } from '@phosphor-icons/react'
 import { sfx } from '../lib/fx'
 
 function isNight() {
@@ -232,9 +232,7 @@ function JarCard({ mood, level, done, target, balance, owed, goalName }: { mood:
               <span className="jar-quote-text">{quote.text}</span>
               <span className="jar-quote-author">{quote.author}</span>
             </motion.button>
-          ) : (
-            <motion.p key="hint" className="tiny muted" style={{ paddingLeft: 4 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>Toca no jarro para uma frase do dia.</motion.p>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </section>
@@ -263,5 +261,11 @@ function EggIcon({ kind }: { kind: EggKind }) {
     case 'mha': return <ArrowFatLinesUp {...p} />
     case 'voxmachina': return <DiceFive {...p} />
     case 'batman': return <Moon {...p} />
+    case 'ladybug': return <BugBeetle {...p} />
+    case 'scottpilgrim': return <GameController {...p} />
+    case 'monsterrancher': return <Disc {...p} />
+    case 'spiderman': return <Spiral {...p} weight="bold" />
+    case 'hadestown': return <Flower {...p} />
+    case 'hungergames': return <Fire {...p} />
   }
 }
