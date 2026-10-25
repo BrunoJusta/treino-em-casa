@@ -3,7 +3,9 @@ import type {
   Profile, Reaction, Session, Snapshot, Walk, WorkoutPlan,
 } from './types'
 
-export type NewWalk = Omit<Walk, 'id' | 'created_at' | 'profile_id'>
+export type NewWalk = Omit<Walk, 'id' | 'created_at' | 'profile_id' | 'photo_path' | 'photo_taken_at'> & {
+  photo?: { blob: Blob; at: string } | null // foto opcional
+}
 
 export interface NewSession {
   profile_id: string
@@ -54,6 +56,7 @@ export interface DataApi {
   // caminhadas
   createWalk(w: NewWalk): Promise<void>
   deleteWalk(id: string): Promise<void>
+  hideWalkPhoto(id: string): Promise<void>
   deleteAllWalks(): Promise<void> // backoffice
   // desculpas
   createExcuse(plannedDayId: string, type: ExcuseType, note: string): Promise<void>

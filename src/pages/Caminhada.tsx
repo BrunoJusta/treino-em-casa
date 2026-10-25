@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { PixelIcon } from '../components/pixel/Pixel'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { CaretDown, CheckCircle, Crosshair, Footprints, Pause, Play, Stop } from '@phosphor-icons/react'
+import { Camera, CaretDown, CheckCircle, Crosshair, DeviceMobile, ImageSquare, Pause, Play, Stop, X } from '@phosphor-icons/react'
 import { useApp } from '../data/store'
 import { api } from '../lib/config'
 import { todayLisbon } from '../lib/dates'
@@ -10,17 +11,21 @@ import { names } from '../lib/format'
 import { Avatar } from '../components/Avatar'
 import { ConfirmSheet } from '../components/ui'
 import { RouteSvg } from '../components/walk/RouteSvg'
+import { PocketMode } from '../components/walk/PocketMode'
+import { CameraCapture, type Shot } from '../components/CameraCapture'
+import { Switch } from '../components/ui'
+import { compressImage } from '../lib/image'
+import { createScreenAwake, type AwakeStatus } from '../lib/screenAwake'
 import {
-  acceptPoint, clearLive, elapsedMs, fmtClock, fmtDuration, fmtKm, fmtPace, liveDistance, loadLive, saveLive, simplify,
+  acceptPoint, clearLive, elapsedMs, fmtClock, fmtDuration, fmtKm, getKeepAwake, liveDistance, setKeepAwake, loadLive, saveLive, simplify,
   takePendingCompanions, MAX_ACCURACY_M, type LatLng, type LiveWalk, type LivePoint,
 } from '../lib/walk'
 
 type Gps = 'waiting' | 'ok' | 'weak' | 'denied' | 'unavailable'
-type WakeLockLike = { release: () => Promise<void> }
 
-const GREEN = '#2f9e55'
+const GREEN = '#1f9d6b'
 
-/** Caminhada ao vivo: tempo, km, ritmo e o percurso a desenhar-se no mapa. */
+/** Caminhada ao vivo: tempo, km e o percurso a desenhar-se no mapa. */
 export default function Caminhada() {
   const { snap, run, toast } = useApp()
   const nav = useNavigate()
@@ -33,6 +38,13 @@ export default function Caminhada() {
   const [here, setHere] = useState<LivePoint | null>(null)
   const [, setTick] = useState(0)
   const [follow, setFollow] = useState(true)
+  const [keepAwake, setKeepAwakeState] = useState(() => getKeepAwake())
+  const [awake, setAwake] = useState<AwakeStatus>('off')
+  const awakeRef = useRef(createScreenAwake())
+  const [pocket, setPocket] = useState(false)
+  const [camera, setCamera] = useState(false)
+  const [shot, setShot] = useState<Shot | null>(null)
+  const galleryRef = useRef<HTMLInputElement>(null)
   const mapEl = useRef<HTMLDivElement>(null)
   const map = useRef<L.Map | null>(null)
   const line = useRef<L.Polyline | null>(null)
@@ -99,17 +111,20 @@ export default function Caminhada() {
     return () => navigator.geolocation.clearWatch(id)
   }, [])
 
-  // ecrã sempre ligado enquanto a caminhada está a decorrer (quando o telemóvel deixa)
-  const running = !!walk && !walk.pausedAt && !summary
+  // manter o ecrã ligado: o estado vem do screenAwake; solta tudo ao sair do ecrã
   useEffect(() => {
-    if (!running) return
-    let lock: WakeLockLike | null = null
-    const wl = (navigator as Navigator & { wakeLock?: { request: (t: 'screen') => Promise<WakeLockLike> } }).wakeLock
-    const ask = () => { if (wl && document.visibilityState === 'visible') wl.request('screen').then((l) => { lock = l }).catch(() => {}) }
-    ask()
-    document.addEventListener('visibilitychange', ask)
-    return () => { document.removeEventListener('visibilitychange', ask); void lock?.release().catch(() => {}) }
-  }, [running])
+    const a = awakeRef.current
+    const off = a.onChange(setAwake)
+    return () => { off(); a.destroy() }
+  }, [])
+  const wake = () => { if (getKeepAwake()) void awakeRef.current.enable() }
+  const sleep = () => awakeRef.current.disable()
+  const toggleAwake = (v: boolean) => {
+    setKeepAwake(v)
+    setKeepAwakeState(v)
+    if (v && walk && !walk.pausedAt && !summary) void awakeRef.current.enable()
+    else if (!v) sleep()
+  }
 
   const start = () => {
     const first = here && here.acc <= MAX_ACCURACY_M ? [here] : []
@@ -118,15 +133,31 @@ export default function Caminhada() {
     setWalk(w)
     line.current?.setLatLngs(first.map((p) => [p.lat, p.lng]))
     setFollow(true)
+    wake()
   }
-  const pause = () => { if (!walk) return; const w = { ...walk, pausedAt: Date.now() }; saveLive(w); setWalk(w) }
+  const pause = () => { if (!walk) return; const w = { ...walk, pausedAt: Date.now() }; saveLive(w); setWalk(w); sleep() }
   const resume = () => {
     if (!walk?.pausedAt) return
     const w = { ...walk, pausedMs: walk.pausedMs + (Date.now() - walk.pausedAt), pausedAt: null }
     saveLive(w)
     setWalk(w)
+    wake()
   }
-  const finish = () => { if (walk && !walk.pausedAt) pause(); setSummary(true) }
+  const enterPocket = () => {
+    if (getKeepAwake() && awake !== 'native' && awake !== 'fallback') void awakeRef.current.enable()
+    try { void document.documentElement.requestFullscreen?.().catch(() => {}) } catch { /* nada */ }
+    setPocket(true)
+  }
+  const exitPocket = () => {
+    setPocket(false)
+    try { if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => {}) } catch { /* nada */ }
+  }
+  const onGallery = async (f: File | undefined) => {
+    if (!f) return
+    const blob = await compressImage(f)
+    setShot({ blob, url: URL.createObjectURL(blob), at: new Date().toISOString() })
+  }
+  const finish = () => { if (walk && !walk.pausedAt) pause(); sleep(); setSummary(true) }
 
   const elapsed = walk ? elapsedMs(walk) : 0
   const meters = walk ? liveDistance(walk) : 0
@@ -147,6 +178,7 @@ export default function Caminhada() {
       route: route.length > 1 ? route : null,
       source: 'live',
       notes: notes.trim().slice(0, 300),
+      photo: shot ? { blob: shot.blob, at: shot.at } : null,
     }), 'Caminhada guardada')
     clearLive()
     nav('/familia')
@@ -156,7 +188,7 @@ export default function Caminhada() {
 
   return (
     <main className="walk-live">
-      <div className="walk-map">
+      <div className="walk-map" {...(camera || pocket ? { inert: '', 'aria-hidden': true } : {})}>
         <div ref={mapEl} style={{ position: 'absolute', inset: 0 }} aria-label="Mapa da caminhada" />
         {(gps === 'denied' || gps === 'unavailable') && (
           <div className="walk-map-msg">
@@ -173,7 +205,7 @@ export default function Caminhada() {
         </div>
       </div>
 
-      <section className="walk-panel" aria-label="Caminhada">
+      <section className="walk-panel" aria-label="Caminhada" {...(camera || pocket ? { inert: '', 'aria-hidden': true } : {})}>
         {people.length > 0 && (
           <div className="row-sm">
             <div className="avatar-stack">{people.map((p) => <Avatar key={p.id} avatar={p.avatar} color={p.color} name={p.display_name} size={28} />)}</div>
@@ -183,13 +215,14 @@ export default function Caminhada() {
         <div className="walk-stats" aria-live="off">
           <div className="main"><b>{fmtClock(elapsed)}</b><span>tempo</span></div>
           <div><b>{(meters / 1000).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b><span>km</span></div>
-          <div><b style={{ fontSize: 22, lineHeight: '33px' }}>{fmtPace(elapsed / 1000, meters).replace(' /km', '')}</b><span>min/km</span></div>
         </div>
+
+        {!summary && <AwakeRow keep={keepAwake} status={awake} live={!!walk && !walk.pausedAt} onToggle={toggleAwake} onRetry={() => void awakeRef.current.enable()} />}
 
         {!walk && (
           <>
             <button className="btn walk huge block" onClick={start}><Play size={26} weight="fill" /> Começar</button>
-            <p className="tiny muted center">O tempo continua a contar com o ecrã bloqueado. O percurso só se desenha com a app aberta, por isso o ecrã fica ligado durante a caminhada.</p>
+            <p className="tiny muted center">O tempo conta sempre. O percurso só se desenha com o ecrã ligado.</p>
           </>
         )}
         {walk && !summary && (
@@ -201,15 +234,31 @@ export default function Caminhada() {
                 : <button className="btn secondary big block" onClick={pause}><Pause size={22} weight="fill" /> Pausa</button>}
               <button className="btn ink big block" onClick={finish}><Stop size={22} weight="fill" /> Terminar</button>
             </div>
+            {!walk.pausedAt && <button className="btn secondary block" onClick={enterPocket}><DeviceMobile size={20} weight="bold" /> Modo bolso</button>}
           </>
         )}
         {walk && summary && (
           <div className="stack">
             <h2 className="row-sm"><CheckCircle size={26} weight="fill" color="var(--walk-text)" /> Boa caminhada!</h2>
             <p className="small" style={{ color: 'var(--ink-2)' }}>{elapsed < 60000 ? `${Math.round(elapsed / 1000)} s` : fmtDuration(Math.round(elapsed / 1000))}{meters > 0 ? `, ${fmtKm(meters)}` : ''}. Não dá XP, mas fica no feed e conta para as conquistas das caminhadas.</p>
-            {route.length > 1 && <RouteSvg route={route} height={120} />}
+            {shot ? (
+              <div className="stack-sm">
+                <img src={shot.url} alt="A foto da caminhada" className="post-photo" />
+                <div className="grid-2">
+                  <button className="btn secondary block" onClick={() => setCamera(true)}><Camera size={20} weight="bold" /> Trocar</button>
+                  <button className="btn secondary block" onClick={() => { URL.revokeObjectURL(shot.url); setShot(null) }}><X size={20} weight="bold" /> Tirar</button>
+                </div>
+              </div>
+            ) : (
+              <div className="stack-sm">
+                <button className="btn walk-soft big block" onClick={() => setCamera(true)}><Camera size={22} weight="bold" /> Tirar foto</button>
+                <button className="btn ghost sm" onClick={() => galleryRef.current?.click()}><ImageSquare size={18} weight="bold" /> Escolher da galeria</button>
+                <input ref={galleryRef} type="file" accept="image/*" hidden onChange={(e) => { void onGallery(e.target.files?.[0]); e.target.value = '' }} />
+              </div>
+            )}
+            {route.length > 1 && <RouteSvg route={route} height={shot ? 100 : 120} />}
             <label className="field"><span>Nota (opcional)</span><input className="input" maxLength={300} placeholder="Volta pela praia" value={notes} onChange={(e) => setNotes(e.target.value)} /></label>
-            <button className="btn walk big block" onClick={save}><Footprints size={22} weight="bold" /> Guardar caminhada</button>
+            <button className="btn walk big block" onClick={save}><PixelIcon name="walk" size={26} /> Guardar caminhada</button>
             <div className="grid-2">
               <button className="btn secondary block" onClick={() => { setSummary(false); resume() }}>Continuar a andar</button>
               <button className="btn danger block" onClick={() => setDiscard(true)}>Descartar</button>
@@ -218,9 +267,34 @@ export default function Caminhada() {
         )}
       </section>
 
+      <PocketMode open={pocket} elapsed={elapsed} meters={meters} onExit={exitPocket} />
+      {camera && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2100 }}>
+          <CameraCapture title="Foto da caminhada" hint="Mostra o caminho, ou quem foi contigo!" defaultFacing="environment"
+            onShot={(x) => { if (shot) URL.revokeObjectURL(shot.url); setShot(x); setCamera(false) }} onCancel={() => setCamera(false)} />
+        </div>
+      )}
+
       <ConfirmSheet open={discard} onClose={() => setDiscard(false)} title="Descartar a caminhada?" danger
         text="O tempo e o percurso desta caminhada perdem-se e nada fica registado."
         confirm="Sim, descartar" onConfirm={() => { clearLive(); setDiscard(false); nav('/') }} />
     </main>
+  )
+}
+
+function AwakeRow({ keep, status, live, onToggle, onRetry }: { keep: boolean; status: AwakeStatus; live: boolean; onToggle: (v: boolean) => void; onRetry: () => void }) {
+  const ok = status === 'native' || status === 'fallback'
+  const tone = !keep ? 'off' : status === 'failed' ? 'warn' : 'ok'
+  const text = !keep
+    ? 'O ecrã pode bloquear e o percurso para.'
+    : status === 'failed'
+      ? 'O telemóvel não deixou. Põe o bloqueio automático em Nunca: Definições > Ecrã e brilho > Bloqueio automático.'
+      : ok ? 'Ecrã sempre ligado.' : live ? 'Toca em "Manter ligado" para o ecrã não bloquear.' : 'O ecrã fica ligado quando começares.'
+  return (
+    <div className={`walk-awake ${tone}`}>
+      <span className="grow"><span className="strong" style={{ display: 'block', color: 'var(--ink)' }}>Manter o ecrã ligado</span><span className="txt">{text}</span></span>
+      {keep && live && !ok && <button className="btn walk-soft sm" onClick={onRetry}>Manter ligado</button>}
+      <Switch checked={keep} onChange={onToggle} label="Manter o ecrã ligado" />
+    </div>
   )
 }

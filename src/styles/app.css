@@ -25,11 +25,11 @@
   --ok: #2f7d1f;
   --ok-soft: #e8f5e4;
   /* caminhadas: verde, para se distinguir do azul dos treinos */
-  --walk: #4cc56f;
-  --walk-ink: #0d3b1c;
-  --walk-text: #1d7a3a;
-  --walk-soft: #e6f7eb;
-  --walk-line: #b4e5c2;
+  --walk: #3ccb8a;
+  --walk-ink: #0b3a2a;
+  --walk-text: #0e7552;
+  --walk-soft: #e4f8ef;
+  --walk-line: #b2ead0;
   --gold: #f9c74f;
   --gold-soft: #fff6dc;
   --r-card: 20px;
@@ -373,8 +373,8 @@ button.cal-day { cursor: pointer; }
 .egg-hungergames { background-image: radial-gradient(ellipse at 100% 100%, rgba(255, 138, 61, 0.35) 0 30px, transparent 60px); }
 
 /* ---------- Caminhadas ---------- */
-.btn.walk { background: var(--walk); color: var(--walk-ink); box-shadow: inset 0 -3px 0 rgba(13, 59, 28, 0.2); }
-.btn.walk:active { box-shadow: inset 0 -1px 0 rgba(13, 59, 28, 0.2); }
+.btn.walk { background: var(--walk); color: var(--walk-ink); box-shadow: inset 0 -3px 0 rgba(11, 58, 42, 0.2); }
+.btn.walk:active { box-shadow: inset 0 -1px 0 rgba(11, 58, 42, 0.2); }
 .btn.walk-soft { background: var(--walk-soft); color: var(--walk-ink); border-color: var(--walk-line); }
 .card.walk { background: var(--walk-soft); border-color: var(--walk-line); }
 .chip.walk { background: var(--walk-soft); border-color: var(--walk-line); color: var(--walk-text); }
@@ -397,9 +397,9 @@ button.cal-day { cursor: pointer; }
 .walk-gps i { width: 8px; height: 8px; border-radius: 50%; background: var(--walk); display: inline-block; }
 .walk-gps.weak i { background: #e5a50a; }
 .walk-gps.off i { background: var(--danger); }
-.walk-panel { background: var(--bg); border-radius: 26px 26px 0 0; box-shadow: var(--shadow-up); padding: 16px 16px calc(16px + var(--safe-b)); display: flex; flex-direction: column; gap: 14px; margin-top: -22px; position: relative; z-index: 600; }
-.walk-stats { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 8px; text-align: center; }
-.walk-stats b { display: block; font-size: 30px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.walk-panel { max-height: calc(100dvh - 120px); overflow-y: auto; overscroll-behavior: contain; background: var(--bg); border-radius: 26px 26px 0 0; box-shadow: var(--shadow-up); padding: 16px 16px calc(16px + var(--safe-b)); display: flex; flex-direction: column; gap: 14px; margin-top: -22px; position: relative; z-index: 600; }
+.walk-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center; }
+.walk-stats b { display: block; font-size: 38px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
 .walk-stats span { font-size: 13px; color: var(--muted); font-weight: 600; }
 .walk-stats .main b { font-size: 38px; color: var(--walk-text); }
 .walk-route { width: 100%; height: auto; display: block; border-radius: 14px; background: var(--walk-soft); }
@@ -409,3 +409,22 @@ button.cal-day { cursor: pointer; }
 .walk-banner .num { font-variant-numeric: tabular-nums; }
 .leaflet-control-attribution { font-size: 10px; }
 .walk-map .leaflet-bottom { bottom: 22px; }
+
+.walk-awake { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
+.walk-awake .grow { line-height: 1.35; }
+.walk-awake.ok .txt { color: var(--walk-text); }
+.walk-awake.warn .txt { color: var(--warn); }
+.walk-awake.off .txt { color: var(--muted); }
+
+/* ---------- Modo bolso ---------- */
+@property --p { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+.pocket { position: fixed; inset: 0; z-index: 2000; background: #000; display: grid; place-items: center; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; overscroll-behavior: none; cursor: default; }
+.pocket-body { display: flex; flex-direction: column; align-items: center; gap: 6px; transition: transform 1.2s ease; }
+.pocket-time { color: #5a5a5a; font-size: 44px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+.pocket-km { color: #4a4a4a; font-size: 20px; font-weight: 600; margin: 0 0 18px; }
+.pocket-hint { color: #3c3c3c; font-size: 13px; margin: 10px 0 0; text-align: center; }
+.pocket-ring { --p: 0%; width: 64px; height: 64px; border-radius: 50%; background: conic-gradient(#2a6b4f var(--p), #1a1a1a 0); -webkit-mask: radial-gradient(circle, transparent 24px, #000 25px); mask: radial-gradient(circle, transparent 24px, #000 25px); }
+.pocket-ring.on { animation: pocket-fill var(--hold, 2000ms) linear forwards; }
+@keyframes pocket-fill { to { --p: 100%; } }
+@media (prefers-reduced-motion: reduce) { .pocket-body { transition: none; } .pocket-ring.on { animation: none; --p: 100%; } }
+.walk-awake .switch.on { background: var(--walk); border-color: var(--walk); }

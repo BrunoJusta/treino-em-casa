@@ -25,9 +25,9 @@ export function RouteSvg({ route, height = 140, label }: { route: LatLng[]; heig
   return (
     <svg className="walk-route" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label ?? 'Percurso da caminhada'}>
       <path d={d} fill="none" stroke="#ffffff" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d={d} fill="none" stroke="#2f9e55" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={sx} cy={sy} r="6" fill="#ffffff" stroke="#2f9e55" strokeWidth="3" />
-      <circle cx={ex} cy={ey} r="6" fill="#2f9e55" stroke="#ffffff" strokeWidth="2.5" />
+      <path d={d} fill="none" stroke="#1f9d6b" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={sx} cy={sy} r="6" fill="#ffffff" stroke="#1f9d6b" strokeWidth="3" />
+      <circle cx={ex} cy={ey} r="6" fill="#1f9d6b" stroke="#ffffff" strokeWidth="2.5" />
     </svg>
   )
 }

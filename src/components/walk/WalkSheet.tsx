@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Footprints, PencilSimpleLine, User, Users, MapTrifold } from '@phosphor-icons/react'
+import { PixelIcon } from '../pixel/Pixel'
+import { ImageSquare, PencilSimpleLine, User, Users, MapTrifold, X } from '@phosphor-icons/react'
+import { compressImage } from '../../lib/image'
 import { useApp } from '../../data/store'
 import { api } from '../../lib/config'
 import { Avatar } from '../Avatar'
@@ -22,9 +24,11 @@ export function WalkSheet({ open, onClose }: { open: boolean; onClose: () => voi
   const [minutes, setMinutes] = useState('')
   const [km, setKm] = useState('')
   const [notes, setNotes] = useState('')
+  const [photo, setPhoto] = useState<{ blob: Blob; url: string; at: string } | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
   const others = snap.profiles.filter((p) => p.active && p.id !== me.id)
 
-  const reset = () => { setStep('mode'); setCompany(null); setPeople([]); setDate(today); setMinutes(''); setKm(''); setNotes('') }
+  const reset = () => { setStep('mode'); setCompany(null); setPeople([]); setDate(today); setMinutes(''); setKm(''); setNotes(''); if (photo) URL.revokeObjectURL(photo.url); setPhoto(null) }
   const close = () => { reset(); onClose() }
 
   const pick = (m: 'manual' | 'live') => {
@@ -57,6 +61,7 @@ export function WalkSheet({ open, onClose }: { open: boolean; onClose: () => voi
       companions: company === 'group' ? people : [],
       date, started_at: start.toISOString(), ended_at: end.toISOString(), duration_s: dur,
       distance_m: dist === null ? null : Math.round(dist * 1000), route: null, source: 'manual', notes: notes.trim().slice(0, 300),
+      photo: photo ? { blob: photo.blob, at: photo.at } : null,
     }), 'Caminhada registada')
     close()
   }
@@ -103,7 +108,7 @@ export function WalkSheet({ open, onClose }: { open: boolean; onClose: () => voi
             </div>
           )}
           <button className="btn walk big block" disabled={!company} onClick={afterWho}>
-            <Footprints size={22} weight="bold" /> {mode === 'live' ? 'Abrir o mapa' : 'Continuar'}
+            <PixelIcon name="walk" size={26} /> {mode === 'live' ? 'Abrir o mapa' : 'Continuar'}
           </button>
           <button className="btn ghost" onClick={() => setStep('mode')}>Voltar</button>
         </div>
@@ -117,7 +122,25 @@ export function WalkSheet({ open, onClose }: { open: boolean; onClose: () => voi
             <label className="field"><span>Distância (km, opcional)</span><input className="input num" inputMode="decimal" placeholder="3,5" value={km} onChange={(e) => setKm(e.target.value)} /></label>
           </div>
           <label className="field"><span>Nota (opcional)</span><input className="input" maxLength={300} placeholder="Volta pela praia" value={notes} onChange={(e) => setNotes(e.target.value)} /></label>
-          <button className="btn walk big block" onClick={save}><Footprints size={22} weight="bold" /> Guardar caminhada</button>
+          <div className="field">
+            <span>Foto (opcional)</span>
+            {photo ? (
+              <div className="row">
+                <img src={photo.url} alt="Foto da caminhada" style={{ width: 72, height: 90, objectFit: 'cover', borderRadius: 12 }} />
+                <button className="btn secondary sm" onClick={() => { URL.revokeObjectURL(photo.url); setPhoto(null) }}><X size={16} weight="bold" /> Tirar a foto</button>
+              </div>
+            ) : (
+              <button className="btn walk-soft block" onClick={() => fileRef.current?.click()}><ImageSquare size={20} weight="bold" /> Adicionar foto</button>
+            )}
+            <input ref={fileRef} type="file" accept="image/*" hidden onChange={async (e) => {
+              const f = e.target.files?.[0]
+              e.target.value = ''
+              if (!f) return
+              const blob = await compressImage(f)
+              setPhoto({ blob, url: URL.createObjectURL(blob), at: new Date().toISOString() })
+            }} />
+          </div>
+          <button className="btn walk big block" onClick={save}><PixelIcon name="walk" size={26} /> Guardar caminhada</button>
           <button className="btn ghost" onClick={() => setStep('who')}>Voltar</button>
         </div>
       )}

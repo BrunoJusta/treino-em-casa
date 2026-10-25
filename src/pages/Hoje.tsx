@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { CaretRight, Camera, GearSix, Play, CalendarPlus, Warning, Footprints } from '@phosphor-icons/react'
+import { CaretRight, Camera, GearSix, Play, CalendarPlus, Warning } from '@phosphor-icons/react'
 import { useApp } from '../data/store'
 import { useFamily, usePerson } from '../data/derived'
 import { Avatar } from '../components/Avatar'
@@ -133,7 +133,7 @@ export function Hoje() {
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}>{hero}</motion.div>
 
-      <button className="btn walk-soft big block" onClick={() => setWalkOpen(true)}><Footprints size={22} weight="bold" /> Registar caminhada</button>
+      <button className="btn walk-soft big block" onClick={() => setWalkOpen(true)}><PixelIcon name="walk" size={26} /> Registar caminhada</button>
       <WalkSheet open={walkOpen} onClose={() => setWalkOpen(false)} />
 
       {pendingExcuses.length > 0 && (
@@ -292,7 +292,7 @@ function LiveWalkBanner() {
   if (!live) return null
   return (
     <Link to="/caminhada" className="walk-banner">
-      <Footprints size={24} weight="bold" />
+      <PixelIcon name="walk" size={28} />
       <span className="grow">{live.pausedAt ? 'Caminhada em pausa' : 'Caminhada a decorrer'}</span>
       <span className="num">{fmtClock(elapsedMs(live))}</span>
       <CaretRight size={20} weight="bold" />

@@ -180,13 +180,37 @@ export function createSupabaseApi(url: string, anon: string): DataApi {
     },
     async createWalk(w) {
       if (!uid) throw new Error('Sessão terminada. Entra outra vez.')
-      must(await sb.from('walks').insert({ ...w, profile_id: uid, companions: w.companions.filter((c) => c !== uid) }))
+      const id = crypto.randomUUID()
+      const { photo, ...rest } = w
+      let photo_path: string | null = null
+      if (photo) {
+        photo_path = `${uid}/walk-${id}.jpg`
+        const up = await sb.storage.from('photos').upload(photo_path, photo.blob, { contentType: 'image/jpeg', upsert: true })
+        if (up.error) throw new Error(up.error.message)
+      }
+      const res = await sb.from('walks').insert({ ...rest, id, profile_id: uid, companions: w.companions.filter((c) => c !== uid), photo_path, photo_taken_at: photo ? photo.at : null })
+      if (res.error) {
+        // se a caminhada não ficou guardada, a foto não fica perdida no Storage
+        if (photo_path) await sb.storage.from('photos').remove([photo_path])
+        throw new Error(res.error.message)
+      }
+    },
+    async hideWalkPhoto(id) {
+      const w = must(await sb.from('walks').select('photo_path').eq('id', id).maybeSingle()) as { photo_path: string | null } | null
+      if (!w?.photo_path) return
+      await sb.storage.from('photos').remove([w.photo_path])
+      must(await sb.from('walks').update({ photo_path: null }).eq('id', id))
     },
     async deleteWalk(id) {
+      const w = must(await sb.from('walks').select('photo_path').eq('id', id).maybeSingle()) as { photo_path: string | null } | null
+      if (w?.photo_path) await sb.storage.from('photos').remove([w.photo_path])
       must(await sb.from('walks').delete().eq('id', id))
     },
     async deleteAllWalks() {
       // a regra de acesso só deixa o admin apagar as caminhadas dos outros
+      const rows = (must(await sb.from('walks').select('photo_path').not('photo_path', 'is', null)) ?? []) as { photo_path: string }[]
+      const paths = rows.map((r) => r.photo_path)
+      for (let i = 0; i < paths.length; i += 100) await sb.storage.from('photos').remove(paths.slice(i, i + 100))
       must(await sb.from('walks').delete().not('id', 'is', null))
       await audit('walks.reset', 'walks', null, 'Caminhadas apagadas')
     },
@@ -298,9 +322,17 @@ export function createSupabaseApi(url: string, anon: string): DataApi {
       const me = must(await sb.from('profiles').select('role').eq('id', uid).maybeSingle()) as { role: string } | null
       if (me?.role !== 'admin') return
       const old = must(await sb.rpc('photos_to_cleanup')) as { id: string; photo_path: string }[]
-      if (!old?.length) return
-      await sb.storage.from('photos').remove(old.map((o) => o.photo_path))
-      must(await sb.rpc('mark_photos_cleaned', { p_ids: old.map((o) => o.id) }))
+      if (old?.length) {
+        await sb.storage.from('photos').remove(old.map((o) => o.photo_path))
+        must(await sb.rpc('mark_photos_cleaned', { p_ids: old.map((o) => o.id) }))
+      }
+      // fotos das caminhadas (se a migração 0012 ainda não correu, esta parte é ignorada)
+      const oldWalks = await sb.rpc('walk_photos_to_cleanup')
+      const ow = (oldWalks.data ?? []) as { id: string; photo_path: string }[]
+      if (!oldWalks.error && ow.length) {
+        await sb.storage.from('photos').remove(ow.map((o) => o.photo_path))
+        must(await sb.rpc('mark_walk_photos_cleaned', { p_ids: ow.map((o) => o.id) }))
+      }
     },
   }
   return api

@@ -116,16 +116,6 @@ export function fmtDuration(sec: number): string {
   return r ? `${h} h ${r} min` : `${h} h`
 }
 
-/** Ritmo em min/km, por exemplo "11:30 /km". */
-export function fmtPace(sec: number, m: number | null | undefined): string {
-  if (!m || m < 50) return '--:--'
-  const per = sec / (m / 1000)
-  const mm = Math.floor(per / 60)
-  const ss = Math.round(per % 60)
-  if (mm > 59) return '--:--'
-  return `${mm}:${String(ss).padStart(2, '0')} /km`
-}
-
 // ---------- caminhada ao vivo, guardada no telemóvel ----------
 export function loadLive(): LiveWalk | null {
   try {
@@ -160,4 +150,25 @@ export function takePendingCompanions(): string[] {
     sessionStorage.removeItem(PENDING)
     return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []
   } catch { return [] }
+}
+
+// ---------- manter o ecrã ligado (preferência guardada no telemóvel) ----------
+const AWAKE = 'tec-walk-keep-awake'
+export function getKeepAwake(): boolean {
+  try { return localStorage.getItem(AWAKE) !== '0' } catch { return true }
+}
+export function setKeepAwake(v: boolean) {
+  try { localStorage.setItem(AWAKE, v ? '1' : '0') } catch { /* nada */ }
+}
+
+// ---------- modo bolso: manter o dedo para sair ----------
+export const POCKET_HOLD_MS = 2000
+/** Temporizador do "mantém o dedo 2 segundos". Separado do componente para se poder testar. */
+export function createHold(onDone: () => void, ms = POCKET_HOLD_MS) {
+  let t: ReturnType<typeof setTimeout> | null = null
+  return {
+    start() { if (t) clearTimeout(t); t = setTimeout(() => { t = null; onDone() }, ms) },
+    cancel() { if (t) { clearTimeout(t); t = null } },
+    get active() { return t !== null },
+  }
 }

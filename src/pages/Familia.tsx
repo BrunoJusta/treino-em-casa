@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { DotsThree, HandsClapping, Fire, Barbell, Footprints } from '@phosphor-icons/react'
+import { DotsThree, HandsClapping, Fire, Barbell } from '@phosphor-icons/react'
 import { RouteSvg } from '../components/walk/RouteSvg'
 import { useApp } from '../data/store'
 import { buildFeed, useFamily } from '../data/derived'
@@ -61,9 +61,10 @@ function Feed() {
                 <div className="grow"><p><strong>{p?.display_name}</strong> {it.text}</p><p className="tiny muted">{it.sub}, {timeAgo(it.at)}</p></div>
                 {canDelete && <button className="icon-btn plain" aria-label="Opções da caminhada" onClick={() => setWalkMenu(w.id)}><DotsThree size={24} weight="bold" /></button>}
               </div>
-              {w.route && w.route.length > 1 && <RouteSvg route={w.route} label={`Percurso da caminhada de ${p?.display_name ?? ''}`} />}
+              {w.photo_path && <Photo path={w.photo_path} alt={`Foto da caminhada de ${p?.display_name ?? ''}`} className="post-photo" />}
+              {w.route && w.route.length > 1 && <RouteSvg route={w.route} height={w.photo_path ? 100 : 140} label={`Percurso da caminhada de ${p?.display_name ?? ''}`} />}
               <div className="row between">
-                <span className="walk-tag"><Footprints size={16} weight="bold" /> Caminhada</span>
+                <span className="walk-tag"><PixelIcon name="walk" size={18} /> Caminhada</span>
                 {w.notes && <span className="small muted" style={{ textAlign: 'right' }}>{w.notes}</span>}
               </div>
             </article>
@@ -104,7 +105,13 @@ function Feed() {
       })}
       {items.length > limit && <button className="btn secondary block" onClick={() => setLimit((l) => l + 15)}>Ver mais</button>}
       <Sheet open={!!walkMenu} onClose={() => setWalkMenu(null)} title="A tua caminhada">
-        <p className="muted">Se apagares, a caminhada sai do feed e deixa de contar para as conquistas, tuas e de quem foi contigo.</p>
+        {snap.walks?.find((x) => x.id === walkMenu)?.photo_path && (
+          <>
+            <p className="muted">Se apagares só a foto, a caminhada continua no feed, sem a foto.</p>
+            <button className="btn secondary big block" onClick={() => run(() => api.hideWalkPhoto(walkMenu!), 'Foto apagada').then(() => setWalkMenu(null))}>Apagar a foto</button>
+          </>
+        )}
+        <p className="muted">Se apagares a caminhada, sai do feed e deixa de contar para as conquistas, tuas e de quem foi contigo.</p>
         <button className="btn danger big block" onClick={() => run(() => api.deleteWalk(walkMenu!), 'Caminhada apagada').then(() => setWalkMenu(null))}>Apagar a caminhada</button>
       </Sheet>
       <Sheet open={!!menu} onClose={() => setMenu(null)} title="A tua foto">

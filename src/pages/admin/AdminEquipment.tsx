@@ -9,7 +9,7 @@ import type { Equipment } from '../../data/types'
 
 const CAT = { cardio: 'Cardio', machine: 'Máquina', free_weight: 'Peso livre', accessory: 'Acessório' } as const
 const STATUS = { ok: 'OK', broken: 'Avariado', arriving: 'A chegar' } as const
-const ICONS = ['station', 'bike', 'treadmill', 'row', 'dumbbell', 'barbell', 'bench', 'weight', 'body']
+const ICONS = ['station', 'bike', 'treadmill', 'elliptical', 'row', 'ball', 'dumbbell', 'barbell', 'bench', 'weight', 'body']
 
 export function AdminEquipment() {
   const { snap, exercises } = useApp()

@@ -28,7 +28,7 @@ function load(): Snapshot {
   if (memory) return memory
   const raw = safeGet(KEY)
   if (raw) {
-    try { memory = JSON.parse(raw) as Snapshot; memory.walks ??= []; return memory } catch { /* seed novo */ }
+    try { memory = JSON.parse(raw) as Snapshot; memory.walks ??= []; for (const w of memory.walks) { w.photo_path ??= null; w.photo_taken_at ??= null }; return memory } catch { /* seed novo */ }
   }
   const s = buildDemoSnapshot()
   // uma desculpa pendente para mostrar o fluxo de aprovação
@@ -152,7 +152,19 @@ export const demoApi: DataApi = {
   async createWalk(w) {
     const m = me()
     if (cmp(w.date, todayLisbon()) > 0) throw new Error('A caminhada não pode ser no futuro.')
-    mutate((s) => { s.walks.push({ ...w, id: uid(), profile_id: m.id, companions: w.companions.filter((c) => c !== m.id), created_at: now() }) })
+    const id = uid()
+    const { photo, ...rest } = w
+    let photo_path: string | null = null
+    if (photo) { photo_path = `walk-${id}.jpg`; await idbSet(`photo:${photo_path}`, photo.blob) }
+    mutate((s) => { s.walks.push({ ...rest, id, profile_id: m.id, companions: w.companions.filter((c) => c !== m.id), photo_path, photo_taken_at: photo ? photo.at : null, created_at: now() }) })
+  },
+  async hideWalkPhoto(id) {
+    const m = me()
+    const w = load().walks.find((x) => x.id === id)
+    if (!w || !w.photo_path) return
+    if (w.profile_id !== m.id) throw new Error('Só quem registou pode apagar a foto.')
+    await idbDel(`photo:${w.photo_path}`)
+    mutate((s) => { const x = s.walks.find((y) => y.id === id); if (x) x.photo_path = null })
   },
   async deleteWalk(id) {
     const m = me()
@@ -160,11 +172,13 @@ export const demoApi: DataApi = {
       const w = s.walks.find((x) => x.id === id)
       if (!w) return
       if (w.profile_id !== m.id && m.role !== 'admin') throw new Error('Só quem registou pode apagar.')
+      if (w.photo_path) void idbDel(`photo:${w.photo_path}`)
       s.walks = s.walks.filter((x) => x.id !== id)
     })
   },
   async deleteAllWalks() {
     requireAdmin()
+    for (const w of load().walks) if (w.photo_path) await idbDel(`photo:${w.photo_path}`)
     mutate((s) => { s.walks = [] }, { action: 'walks.reset', entity: 'walks', detail: 'Caminhadas apagadas' })
   },
   async createExcuse(plannedDayId, type, note) {
@@ -325,6 +339,7 @@ export const demoApi: DataApi = {
     requireAdmin()
     const s = load()
     for (const x of s.sessions) if (x.photo_path && !x.photo_path.startsWith('demo:')) await idbDel(`photo:${x.photo_path}`)
+    for (const x of s.walks ?? []) if (x.photo_path) await idbDel(`photo:${x.photo_path}`)
     mutate((snap) => {
       snap.sessions = []
       snap.walks = []
@@ -348,6 +363,7 @@ export const demoApi: DataApi = {
     // limpeza das fotos com mais de 90 dias
     const limit = addDays(today, -90)
     for (const s of after.sessions) if (s.photo_path && cmp(s.date, limit) < 0) { s.photo_path = null; s.in_feed = false }
+    for (const w of after.walks ?? []) if (w.photo_path && cmp(w.date, limit) < 0) { void idbDel(`photo:${w.photo_path}`); w.photo_path = null }
     if (JSON.stringify(after) !== JSON.stringify(before)) {
       memory = after
       persist()

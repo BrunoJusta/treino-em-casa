@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import { acceptPoint, elapsedMs, fmtKm, fmtPace, haversine, pathLength, simplify, type LiveWalk } from './walk'
+import { describe, expect, it, vi } from 'vitest'
+import { acceptPoint, createHold, elapsedMs, fmtKm, getKeepAwake, haversine, pathLength, setKeepAwake, simplify, type LiveWalk } from './walk'
+import { createScreenAwake } from './screenAwake'
 import { walkTotals, walksOf } from './rules/game'
 import type { Walk } from '../data/types'
 
@@ -31,14 +32,44 @@ describe('caminhadas', () => {
     expect(simplify(line)).toHaveLength(2)
   })
 
-  it('formata km e ritmo', () => {
+  it('formata km', () => {
     expect(fmtKm(3456)).toBe('3,46 km')
-    expect(fmtPace(1800, 3000)).toBe('10:00 /km')
-    expect(fmtPace(1800, 10)).toBe('--:--')
+  })
+
+  it('manter o ecrã ligado vem ligado por omissão e guarda a escolha', () => {
+    const mem = new Map<string, string>()
+    vi.stubGlobal('localStorage', { getItem: (k: string) => mem.get(k) ?? null, setItem: (k: string, v: string) => mem.set(k, v) })
+    expect(getKeepAwake()).toBe(true)
+    setKeepAwake(false)
+    expect(getKeepAwake()).toBe(false)
+    vi.unstubAllGlobals()
+  })
+
+  it('usa o Wake Lock quando há, o plano B quando não há, e avisa quando nenhum dá', async () => {
+    const doc = { visibilityState: 'visible' as const, addEventListener: () => {}, removeEventListener: () => {} }
+    const ok = createScreenAwake({ wakeLock: { request: async () => ({ release: async () => {} }) }, doc: doc as never })
+    expect(await ok.enable()).toBe('native')
+    ok.disable()
+    expect(ok.status()).toBe('off')
+    const fb = createScreenAwake({ wakeLock: { request: async () => { throw new Error('não') } }, makeNoSleep: () => ({ isEnabled: true, enable: async () => {}, disable: () => {} }), doc: doc as never })
+    expect(await fb.enable()).toBe('fallback')
+    const bad = createScreenAwake({ wakeLock: null, makeNoSleep: () => ({ isEnabled: false, enable: async () => { throw new Error('não') }, disable: () => {} }), doc: doc as never })
+    expect(await bad.enable()).toBe('failed')
+  })
+
+  it('modo bolso: largar antes dos 2 s não sai, aguentar 2 s sai', () => {
+    vi.useFakeTimers()
+    const done = vi.fn()
+    const h = createHold(done)
+    h.start(); vi.advanceTimersByTime(1500); h.cancel(); vi.advanceTimersByTime(1000)
+    expect(done).not.toHaveBeenCalled()
+    h.start(); vi.advanceTimersByTime(2000)
+    expect(done).toHaveBeenCalledTimes(1)
+    vi.useRealTimers()
   })
 
   it('a caminhada conta para quem registou e para quem foi', () => {
-    const w = (id: string, by: string, comp: string[], m: number): Walk => ({ id, profile_id: by, companions: comp, date: '2026-10-25', started_at: `2026-10-25T10:0${id}:00Z`, ended_at: `2026-10-25T11:0${id}:00Z`, duration_s: 3600, distance_m: m, route: null, source: 'manual', notes: '', created_at: '' })
+    const w = (id: string, by: string, comp: string[], m: number): Walk => ({ id, profile_id: by, companions: comp, date: '2026-10-25', started_at: `2026-10-25T10:0${id}:00Z`, ended_at: `2026-10-25T11:0${id}:00Z`, duration_s: 3600, distance_m: m, route: null, source: 'manual', notes: '', photo_path: null, photo_taken_at: null, created_at: '' })
     const walks = [w('1', 'a', ['b'], 4000), w('2', 'b', [], 2000), w('3', 'c', [], 1000)]
     expect(walksOf('b', walks).map((x) => x.id)).toEqual(['1', '2'])
     expect(walkTotals('b', walks).meters).toBe(6000)

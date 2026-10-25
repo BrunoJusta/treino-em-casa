@@ -174,6 +174,8 @@ export interface Walk {
   route: [number, number][] | null // [lat, lng], simplificado
   source: 'manual' | 'live'
   notes: string
+  photo_path: string | null // null = sem foto, ou apagada (pela pessoa ou ao fim de 90 dias)
+  photo_taken_at: string | null
   created_at: string
 }
 

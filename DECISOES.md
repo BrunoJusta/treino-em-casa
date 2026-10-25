@@ -95,3 +95,16 @@ Registo das decisões fechadas com o Bruno antes de construir. Quando uma regra 
 ## Eliminar dias marcados
 
 - Um dia de hoje em diante pode ser sempre eliminado, mesmo que a semana fique abaixo do mínimo. A app avisa quantos dias ficam. Os dias que já passaram continuam a não se poder eliminar.
+
+## Caminhadas v2 (outubro de 2026)
+
+- Sem ritmo (min/km) no ecrã da caminhada: só tempo e km.
+- "Manter o ecrã ligado" no ecrã da caminhada, ligado por omissão e guardado no telemóvel. Primeiro usa o Wake Lock; se falhar, o plano B do NoSleep.js (vídeo invisível e sem som). Se nada der, aparece o aviso para pôr o bloqueio automático em "Nunca".
+- Modo bolso: ecrã preto com o tempo e os km, toques bloqueados, sai mantendo o dedo 2 segundos. Só entra quando a pessoa carrega no botão.
+- Foto da caminhada opcional (câmara traseira por omissão, ou da galeria; também no registo manual). Aparece no feed por cima do percurso, quem registou pode apagá-la, e apaga-se ao fim de 90 dias como as dos treinos.
+- O botão lateral do telemóvel e mudar para outra app continuam a parar o GPS. Uma app web não consegue impedir isso.
+
+## Material novo
+
+- Elíptica (5 exercícios) e bola de Pilates (15 exercícios), ambas OK.
+- Verde das caminhadas mais fresco (#3ccb8a) e sapatilha em pixel art como símbolo das caminhadas.
