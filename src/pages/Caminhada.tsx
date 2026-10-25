@@ -243,7 +243,10 @@ export default function Caminhada() {
             <p className="small" style={{ color: 'var(--ink-2)' }}>{elapsed < 60000 ? `${Math.round(elapsed / 1000)} s` : fmtDuration(Math.round(elapsed / 1000))}{meters > 0 ? `, ${fmtKm(meters)}` : ''}. Não dá XP, mas fica no feed e conta para as conquistas das caminhadas.</p>
             {shot ? (
               <div className="stack-sm">
-                <img src={shot.url} alt="A foto da caminhada" className="post-photo" />
+                <div className="walk-photo">
+                  <img src={shot.url} alt="A foto da caminhada" className="post-photo" />
+                  {route.length > 1 && <RouteSvg overlay route={route} />}
+                </div>
                 <div className="grid-2">
                   <button className="btn secondary block" onClick={() => setCamera(true)}><Camera size={20} weight="bold" /> Trocar</button>
                   <button className="btn secondary block" onClick={() => { URL.revokeObjectURL(shot.url); setShot(null) }}><X size={20} weight="bold" /> Tirar</button>
@@ -256,7 +259,7 @@ export default function Caminhada() {
                 <input ref={galleryRef} type="file" accept="image/*" hidden onChange={(e) => { void onGallery(e.target.files?.[0]); e.target.value = '' }} />
               </div>
             )}
-            {route.length > 1 && <RouteSvg route={route} height={shot ? 100 : 120} />}
+            {!shot && route.length > 1 && <RouteSvg route={route} height={120} />}
             <label className="field"><span>Nota (opcional)</span><input className="input" maxLength={300} placeholder="Volta pela praia" value={notes} onChange={(e) => setNotes(e.target.value)} /></label>
             <button className="btn walk big block" onClick={save}><PixelIcon name="walk" size={26} /> Guardar caminhada</button>
             <div className="grid-2">

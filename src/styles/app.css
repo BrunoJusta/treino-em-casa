@@ -428,3 +428,6 @@ button.cal-day { cursor: pointer; }
 @keyframes pocket-fill { to { --p: 100%; } }
 @media (prefers-reduced-motion: reduce) { .pocket-body { transition: none; } .pocket-ring.on { animation: none; --p: 100%; } }
 .walk-awake .switch.on { background: var(--walk); border-color: var(--walk); }
+.walk-photo { position: relative; }
+.walk-photo .post-photo { display: block; }
+.walk-route-overlay { position: absolute; right: 12px; bottom: 12px; width: 32%; max-width: 140px; height: auto; pointer-events: none; }

@@ -61,8 +61,12 @@ function Feed() {
                 <div className="grow"><p><strong>{p?.display_name}</strong> {it.text}</p><p className="tiny muted">{it.sub}, {timeAgo(it.at)}</p></div>
                 {canDelete && <button className="icon-btn plain" aria-label="Opções da caminhada" onClick={() => setWalkMenu(w.id)}><DotsThree size={24} weight="bold" /></button>}
               </div>
-              {w.photo_path && <Photo path={w.photo_path} alt={`Foto da caminhada de ${p?.display_name ?? ''}`} className="post-photo" />}
-              {w.route && w.route.length > 1 && <RouteSvg route={w.route} height={w.photo_path ? 100 : 140} label={`Percurso da caminhada de ${p?.display_name ?? ''}`} />}
+              {w.photo_path ? (
+                <div className="walk-photo">
+                  <Photo path={w.photo_path} alt={`Foto da caminhada de ${p?.display_name ?? ''}`} className="post-photo" />
+                  {w.route && w.route.length > 1 && <RouteSvg overlay route={w.route} label={`Percurso da caminhada de ${p?.display_name ?? ''}`} />}
+                </div>
+              ) : w.route && w.route.length > 1 && <RouteSvg route={w.route} label={`Percurso da caminhada de ${p?.display_name ?? ''}`} />}
               <div className="row between">
                 <span className="walk-tag"><PixelIcon name="walk" size={18} /> Caminhada</span>
                 {w.notes && <span className="small muted" style={{ textAlign: 'right' }}>{w.notes}</span>}

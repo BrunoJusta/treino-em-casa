@@ -1,11 +1,14 @@
 import type { LatLng } from '../../lib/walk'
 
-/** Desenho simples do percurso (sem mapa por baixo), para o feed e o resumo. */
-export function RouteSvg({ route, height = 140, label }: { route: LatLng[]; height?: number; label?: string }) {
+/**
+ * Desenho simples do percurso (sem mapa por baixo), para o feed e o resumo.
+ * overlay: versão pequena, branca e sem fundo, para ficar por cima da foto, num canto.
+ */
+export function RouteSvg({ route, height = 140, label, overlay = false }: { route: LatLng[]; height?: number; label?: string; overlay?: boolean }) {
   if (route.length < 2) return null
-  const W = 320
-  const H = height
-  const pad = 14
+  const W = overlay ? 120 : 320
+  const H = overlay ? 120 : height
+  const pad = overlay ? 12 : 14
   const lat0 = (route[0][0] * Math.PI) / 180
   const pts = route.map(([la, ln]) => [ln * Math.cos(lat0), la])
   const xs = pts.map((p) => p[0])
@@ -22,6 +25,17 @@ export function RouteSvg({ route, height = 140, label }: { route: LatLng[]; heig
   const d = xy.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
   const [sx, sy] = xy[0]
   const [ex, ey] = xy[xy.length - 1]
+  if (overlay) {
+    return (
+      <svg className="walk-route-overlay" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label ?? 'Percurso da caminhada'}>
+        <path d={d} fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={d} fill="none" stroke="#ffffff" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx={sx} cy={sy} r="7" fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="7" />
+        <circle cx={sx} cy={sy} r="7" fill="none" stroke="#ffffff" strokeWidth="4" />
+        <circle cx={ex} cy={ey} r="8" fill="#ffffff" stroke="rgba(0,0,0,0.35)" strokeWidth="2" />
+      </svg>
+    )
+  }
   return (
     <svg className="walk-route" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label ?? 'Percurso da caminhada'}>
       <path d={d} fill="none" stroke="#ffffff" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
