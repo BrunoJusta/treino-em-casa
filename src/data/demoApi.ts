@@ -28,7 +28,7 @@ function load(): Snapshot {
   if (memory) return memory
   const raw = safeGet(KEY)
   if (raw) {
-    try { memory = JSON.parse(raw) as Snapshot; return memory } catch { /* seed novo */ }
+    try { memory = JSON.parse(raw) as Snapshot; memory.walks ??= []; return memory } catch { /* seed novo */ }
   }
   const s = buildDemoSnapshot()
   // uma desculpa pendente para mostrar o fluxo de aprovação
@@ -148,6 +148,24 @@ export const demoApi: DataApi = {
       if (ex) s.reactions = s.reactions.filter((r) => r !== ex)
       else s.reactions.push({ id: uid(), session_id: sessionId, profile_id: currentUser!, kind, created_at: now() })
     })
+  },
+  async createWalk(w) {
+    const m = me()
+    if (cmp(w.date, todayLisbon()) > 0) throw new Error('A caminhada não pode ser no futuro.')
+    mutate((s) => { s.walks.push({ ...w, id: uid(), profile_id: m.id, companions: w.companions.filter((c) => c !== m.id), created_at: now() }) })
+  },
+  async deleteWalk(id) {
+    const m = me()
+    mutate((s) => {
+      const w = s.walks.find((x) => x.id === id)
+      if (!w) return
+      if (w.profile_id !== m.id && m.role !== 'admin') throw new Error('Só quem registou pode apagar.')
+      s.walks = s.walks.filter((x) => x.id !== id)
+    })
+  },
+  async deleteAllWalks() {
+    requireAdmin()
+    mutate((s) => { s.walks = [] }, { action: 'walks.reset', entity: 'walks', detail: 'Caminhadas apagadas' })
   },
   async createExcuse(plannedDayId, type, note) {
     const pd = load().plannedDays.find((d) => d.id === plannedDayId)
@@ -309,6 +327,7 @@ export const demoApi: DataApi = {
     for (const x of s.sessions) if (x.photo_path && !x.photo_path.startsWith('demo:')) await idbDel(`photo:${x.photo_path}`)
     mutate((snap) => {
       snap.sessions = []
+      snap.walks = []
       snap.plannedDays = []
       snap.excuses = []
       snap.jar = []

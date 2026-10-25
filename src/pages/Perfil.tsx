@@ -7,7 +7,8 @@ import { api } from '../lib/config'
 import { AvatarUpload } from '../components/AvatarUpload'
 import { PixelIcon } from '../components/pixel/Pixel'
 import { BackHeader, Bar, Sheet, Switch } from '../components/ui'
-import { BADGES, badgesFor, LEVELS, totalMinutes } from '../lib/rules/game'
+import { BADGES, badgesFor, LEVELS, totalMinutes, walkTotals } from '../lib/rules/game'
+import { fmtKm } from '../lib/walk'
 import { RESTRICTION_TAGS } from '../lib/rules/restrictions'
 import { shortDate } from '../lib/dates'
 
@@ -67,20 +68,29 @@ export function Perfil() {
         <div className="stat"><b className="num">{p.streak.weeks}</b><span>semanas seguidas</span></div>
       </section>
 
-      <section className="stack-sm">
-        <div className="section-title"><h2>Conquistas</h2><span className="small muted num">{earned.length}/{BADGES.length}</span></div>
-        <div className="grid-3">
-          {BADGES.map((x) => {
-            const has = earned.some((e) => e.code === x.code)
-            return (
-              <button key={x.code} className={`badge-tile ${has ? '' : 'locked'}`} onClick={() => setBadge(x.code)} aria-label={`${x.name}${has ? '' : ', por desbloquear'}`}>
-                <span className={`medal tier-${x.tier}`}><PixelIcon name={has ? x.icon : 'lock'} size={34} /></span>
-                <span>{x.name}</span>
-              </button>
-            )
-          })}
-        </div>
-      </section>
+      {[
+        { title: 'Conquistas', list: BADGES.filter((x) => !x.walk) },
+        { title: 'Caminhadas', list: BADGES.filter((x) => x.walk) },
+      ].map((grp) => (
+        <section key={grp.title} className="stack-sm">
+          <div className="section-title"><h2>{grp.title}</h2><span className="small muted num">{grp.list.filter((x) => earned.some((e) => e.code === x.code)).length}/{grp.list.length}</span></div>
+          {grp.title === 'Caminhadas' && (() => {
+            const t = walkTotals(profile.id, snap.walks)
+            return <p className="small" style={{ color: 'var(--walk-text)' }}>{t.count ? `${t.count} ${t.count === 1 ? 'caminhada' : 'caminhadas'}${t.meters ? `, ${fmtKm(t.meters)} no total` : ''}. Não dão XP.` : 'Ainda sem caminhadas. Não dão XP, mas têm conquistas próprias.'}</p>
+          })()}
+          <div className="grid-3">
+            {grp.list.map((x) => {
+              const has = earned.some((e) => e.code === x.code)
+              return (
+                <button key={x.code} className={`badge-tile ${has ? '' : 'locked'}`} onClick={() => setBadge(x.code)} aria-label={`${x.name}${has ? '' : ', por desbloquear'}`}>
+                  <span className={`medal tier-${x.tier}`}><PixelIcon name={has ? x.icon : 'lock'} size={34} /></span>
+                  <span>{x.name}</span>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      ))}
 
       {canSeePrivate && (
         <section className="stack-sm">

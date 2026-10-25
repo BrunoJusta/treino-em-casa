@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { get as idbGet, set as idbSet } from 'idb-keyval'
 import { DEFAULT_SETTINGS, usernameToEmail, type DataApi, type NewSession } from './api'
-import type { Exercise, Profile, Snapshot, Session } from './types'
+import type { Exercise, Profile, Snapshot, Session, Walk } from './types'
 
 const CACHE_KEY = 'tec-snapshot-cache'
 const QUEUE_KEY = 'tec-offline-queue'
@@ -74,7 +74,7 @@ export function createSupabaseApi(url: string, anon: string): DataApi {
     },
     async loadSnapshot() {
       try {
-        const [profiles, equipment, plans, plannedDays, sessions, excuses, jar, settings, reactions, closures, audit, edits, custom, priv] = await Promise.all([
+        const [profiles, equipment, plans, plannedDays, sessions, excuses, jar, settings, reactions, closures, audit, edits, custom, priv, walks] = await Promise.all([
           sb.from('profiles').select('*').order('created_at'),
           sb.from('equipment').select('*').order('name'),
           sb.from('plans').select('*'),
@@ -89,6 +89,7 @@ export function createSupabaseApi(url: string, anon: string): DataApi {
           sb.from('exercise_edits').select('*'),
           sb.from('custom_exercises').select('*'),
           sb.from('profile_private').select('*'),
+          sb.from('walks').select('*').order('started_at'),
         ])
         const snap: Snapshot = {
           // restrições: só chegam as minhas (ou todas, se for admin)
@@ -105,6 +106,8 @@ export function createSupabaseApi(url: string, anon: string): DataApi {
           audit: (audit.data ?? []).reverse(),
           exerciseOverrides: Object.fromEntries((edits.data ?? []).map((e: { exercise_id: string; patch: Partial<Exercise> }) => [e.exercise_id, e.patch])),
           customExercises: (custom.data ?? []).map((c: { data: Exercise }) => c.data),
+          // se a migração das caminhadas ainda não correu, a app continua a funcionar sem elas
+          walks: (walks.data ?? []) as Walk[],
         }
         // treinos ainda na fila offline aparecem logo
         const queue = (await idbGet<QueuedSession[]>(QUEUE_KEY)) ?? []
@@ -124,7 +127,7 @@ export function createSupabaseApi(url: string, anon: string): DataApi {
         t = setTimeout(cb, 300)
       }
       const ch = sb.channel('familia')
-      for (const table of ['planned_days', 'sessions', 'excuses', 'jar_entries', 'reactions', 'plans', 'profiles', 'settings', 'month_closures', 'equipment']) {
+      for (const table of ['planned_days', 'sessions', 'excuses', 'jar_entries', 'reactions', 'plans', 'profiles', 'settings', 'month_closures', 'equipment', 'walks']) {
         ch.on('postgres_changes', { event: '*', schema: 'public', table }, debounced)
       }
       ch.subscribe()
@@ -174,6 +177,18 @@ export function createSupabaseApi(url: string, anon: string): DataApi {
       const ex = must(await sb.from('reactions').select('id').eq('session_id', sessionId).eq('profile_id', uid).eq('kind', kind)) as { id: string }[]
       if (ex.length) must(await sb.from('reactions').delete().eq('id', ex[0].id))
       else must(await sb.from('reactions').insert({ session_id: sessionId, profile_id: uid, kind }))
+    },
+    async createWalk(w) {
+      if (!uid) throw new Error('Sessão terminada. Entra outra vez.')
+      must(await sb.from('walks').insert({ ...w, profile_id: uid, companions: w.companions.filter((c) => c !== uid) }))
+    },
+    async deleteWalk(id) {
+      must(await sb.from('walks').delete().eq('id', id))
+    },
+    async deleteAllWalks() {
+      // a regra de acesso só deixa o admin apagar as caminhadas dos outros
+      must(await sb.from('walks').delete().not('id', 'is', null))
+      await audit('walks.reset', 'walks', null, 'Caminhadas apagadas')
     },
     async createExcuse(plannedDayId, type, note) {
       must(await sb.rpc('create_excuse', { p_planned_day: plannedDayId, p_type: type, p_note: note }))

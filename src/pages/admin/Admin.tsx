@@ -4,7 +4,7 @@ import { Check, DownloadSimple, X } from '@phosphor-icons/react'
 import { useApp } from '../../data/store'
 import { api } from '../../lib/config'
 import { Avatar } from '../../components/Avatar'
-import { BackHeader, Empty, Sheet, Switch } from '../../components/ui'
+import { BackHeader, ConfirmSheet, Empty, Sheet, Switch } from '../../components/ui'
 import { EXCUSE_LABEL } from '../../components/DayActions'
 import { euros, jarTotals } from '../../lib/rules/jar'
 import { longDate, monthLabel, timeAgo, todayLisbon } from '../../lib/dates'
@@ -285,7 +285,7 @@ function Repor() {
       </div>
       <div className="card soft stack-sm">
         <p className="strong">O que é apagado</p>
-        <p className="small" style={{ color: 'var(--ink-2)' }}>Treinos e as respetivas fotos, dias marcados, desculpas, multas, pagamentos e gastos do jarro, reações, fechos de mês e o registo de atividade. O XP, os níveis, os streaks e as conquistas voltam a zero, porque são calculados a partir dos treinos.</p>
+        <p className="small" style={{ color: 'var(--ink-2)' }}>Treinos e as respetivas fotos, caminhadas, dias marcados, desculpas, multas, pagamentos e gastos do jarro, reações, fechos de mês e o registo de atividade. O XP, os níveis, os streaks e as conquistas voltam a zero, porque são calculados a partir dos treinos.</p>
         <p className="strong" style={{ marginTop: 6 }}>O que fica</p>
         <p className="small" style={{ color: 'var(--ink-2)' }}>As pessoas e os códigos de acesso, as fotos de perfil, as restrições, o material, os planos, as regras do jarro e as correções aos exercícios.</p>
       </div>
@@ -300,6 +300,25 @@ function Repor() {
       </label>
       <button className="btn danger big block" disabled={word.trim().toUpperCase() !== 'REPOR'} onClick={go}>Repor tudo</button>
       {done && <p role="status" className="card accent small">Feito. A app está como nova. Os dias de cada pessoa começam a ser marcados outra vez em Planear.</p>}
+
+      <WalksReset />
     </section>
+  )
+}
+
+// Só as caminhadas: para testar o módulo e limpar depois, sem mexer no resto.
+function WalksReset() {
+  const { snap, run } = useApp()
+  const [open, setOpen] = useState(false)
+  const n = (snap.walks ?? []).length
+  return (
+    <div className="card walk stack-sm" style={{ marginTop: 12 }}>
+      <h3>Apagar todas as caminhadas</h3>
+      <p className="small" style={{ color: 'var(--ink-2)' }}>Apaga as caminhadas de toda a gente ({n} {n === 1 ? 'registada' : 'registadas'}), que saem do feed, e as conquistas das caminhadas voltam a zero. Os treinos e o resto ficam como estão.</p>
+      <button className="btn danger block" disabled={!n} onClick={() => setOpen(true)}>Apagar as caminhadas</button>
+      <ConfirmSheet open={open} onClose={() => setOpen(false)} title="Apagar todas as caminhadas?" danger
+        text={`Vão ser apagadas ${n} ${n === 1 ? 'caminhada' : 'caminhadas'} de toda a família. Não dá para desfazer.`}
+        confirm="Sim, apagar" onConfirm={() => { setOpen(false); void run(() => api.deleteAllWalks(), 'Caminhadas apagadas') }} />
+    </div>
   )
 }

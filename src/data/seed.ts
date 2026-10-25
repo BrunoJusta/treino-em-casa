@@ -140,5 +140,6 @@ export function buildDemoSnapshot(now = new Date()): Snapshot {
     audit: [],
     exerciseOverrides: {},
     customExercises: [],
+    walks: [],
   }
 }

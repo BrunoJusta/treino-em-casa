@@ -342,6 +342,20 @@ export const SPRITES: Record<string, string[]> = {
     '...kyyyyk...',
     '...kkkkkk...',
   ],
+  boot: [
+    '............',
+    '............',
+    '..kkkk......',
+    '.knnnnk.....',
+    '.knwnwnk....',
+    '.knnnnnkk...',
+    '.knnwnnnnkk.',
+    '.knnnnnnnnnk',
+    'kwwwwwwwwwwk',
+    'kkkkkkkkkkkk',
+    '............',
+    '............',
+  ],
   compass: [
     '...kkkkkk...',
     '..kwwwwwwk..',
@@ -441,7 +455,7 @@ export const PATTERN_ICON: Record<string, string> = {
 
 export const ICON_LABEL: Record<string, string> = {
   dumbbell: 'Haltere', barbell: 'Barra', bench: 'Banco', station: 'Multiestação', treadmill: 'Passadeira', bike: 'Bicicleta', row: 'Remo',
-  weight: 'Peso', body: 'Peso do corpo', heart: 'Coração', flame: 'Chama', star: 'Estrela', core: 'Core', pernas: 'Pernas',
+  weight: 'Peso', body: 'Peso do corpo', heart: 'Coração', boot: 'Sapatilha', flame: 'Chama', star: 'Estrela', core: 'Core', pernas: 'Pernas',
 }
 
 export const PATTERN_LABEL: Record<string, string> = {

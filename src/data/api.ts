@@ -1,7 +1,9 @@
 import type {
   BodyMetric, BodyProfile, Equipment, Exercise, ExcuseType, JarEntry, JarSettings, LoginProfile, PlannedDay,
-  Profile, Reaction, Session, Snapshot, WorkoutPlan,
+  Profile, Reaction, Session, Snapshot, Walk, WorkoutPlan,
 } from './types'
+
+export type NewWalk = Omit<Walk, 'id' | 'created_at' | 'profile_id'>
 
 export interface NewSession {
   profile_id: string
@@ -49,6 +51,10 @@ export interface DataApi {
   createSession(s: NewSession): Promise<Session>
   hideSessionPhoto(sessionId: string): Promise<void>
   toggleReaction(sessionId: string, kind: Reaction['kind']): Promise<void>
+  // caminhadas
+  createWalk(w: NewWalk): Promise<void>
+  deleteWalk(id: string): Promise<void>
+  deleteAllWalks(): Promise<void> // backoffice
   // desculpas
   createExcuse(plannedDayId: string, type: ExcuseType, note: string): Promise<void>
   decideExcuse(id: string, approve: boolean): Promise<void>

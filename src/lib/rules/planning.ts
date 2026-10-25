@@ -4,10 +4,10 @@ import type { Excuse, PlannedDay, Session } from '../../data/types'
 /**
  * Mínimo de dias numa semana (segunda a domingo) dentro de um mês.
  * As semanas cortadas no início e no fim do mês têm o mínimo proporcional:
- * com menos de 4 dias dentro do mês, pede metade (arredondada para cima).
+ * com 4 dias ou menos dentro do mês, pede metade (arredondada para cima).
  */
 export function weekRequirement(daysInMonthForWeek: number, minPerWeek: number): number {
-  if (daysInMonthForWeek >= 4) return minPerWeek
+  if (daysInMonthForWeek >= 5) return minPerWeek
   return Math.min(daysInMonthForWeek, Math.ceil(minPerWeek / 2))
 }
 
@@ -73,13 +73,16 @@ export function canUnmark(pd: PlannedDay, ctx: Ctx): { ok: boolean; reason?: str
   const st = dayState(pd, ctx.today, ctx.sessions, ctx.excuses, ctx.closedMonths)
   if (st === 'done') return { ok: false, reason: 'Este dia já tem treino feito.' }
   if (st === 'pending' || st === 'excused') return { ok: false, reason: 'Este dia tem uma desculpa.' }
+  return { ok: true }
+}
+
+/** Aviso (não bloqueia): a semana fica abaixo do mínimo se este dia for eliminado? */
+export function unmarkWarning(pd: PlannedDay, ctx: Ctx): string | null {
   const mk = monthKey(pd.date)
   const marked = ctx.days.filter((d) => monthKey(d.date) === mk && d.id !== pd.id).map((d) => d.date)
   const wk = checkMonthWeeks(mk, marked, ctx.minPerWeek).find((w) => w.start === weekStart(pd.date))
-  if (wk && !wk.ok) {
-    return { ok: false, reason: `Esta semana precisa de pelo menos ${wk.required} ${wk.required === 1 ? 'dia' : 'dias'}. Em vez de eliminar, muda-o para outro dia.` }
-  }
-  return { ok: true }
+  if (wk && !wk.ok) return `Se eliminares, esta semana fica com ${wk.count} de ${wk.required} ${wk.required === 1 ? 'dia' : 'dias'}. Lembra-te de marcar outro.`
+  return null
 }
 
 /** Pode mudar-se um dia marcado para outra data? Dentro do mesmo mês, para hoje ou para a frente. */

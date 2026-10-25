@@ -82,3 +82,16 @@ Registo das decisões fechadas com o Bruno antes de construir. Quando uma regra 
 ## Técnica
 
 - React + Vite + TypeScript, PWA. Supabase (Postgres com RLS, Auth, Storage, Realtime, Edge Function, pg_cron). Deploy na Vercel. Repositório `BrunoJusta/treino-em-casa`.
+
+## Caminhadas (outubro de 2026)
+
+- Botão verde "Registar caminhada" no Hoje. Duas opções: registar à mão (dia, minutos, km opcional) ou começar ao vivo (tempo, km, ritmo e percurso no mapa).
+- Primeiro pergunta se é sozinho ou acompanhado. A caminhada fica registada uma vez, por quem a registou, e conta para todos os que foram.
+- Não dão XP, não contam como dia marcado nem como treino, não entram na meta da família. Aparecem no feed e têm 9 conquistas próprias (secção "Caminhadas" no perfil).
+- O tempo conta a partir das horas de início e das pausas, por isso continua certo com o ecrã bloqueado. O GPS de uma app web só funciona com a app aberta, por isso o ecrã fica ligado durante a caminhada; se o GPS parar, esse troço fica em linha reta.
+- Mapa com Leaflet e OpenStreetMap, só carregado no ecrã da caminhada.
+- Só quem registou (ou o admin) apaga uma caminhada. No backoffice, em Repor, há um botão para apagar todas as caminhadas.
+
+## Eliminar dias marcados
+
+- Um dia de hoje em diante pode ser sempre eliminado, mesmo que a semana fique abaixo do mínimo. A app avisa quantos dias ficam. Os dias que já passaram continuam a não se poder eliminar.

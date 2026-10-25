@@ -3,7 +3,7 @@ import { ArrowsLeftRight, FirstAidKit, Trash, Barbell } from '@phosphor-icons/re
 import { useApp } from '../data/store'
 import { api } from '../lib/config'
 import { cmp, dayOfMonth, longDate, monthDays, monthKey, WEEKDAY_SHORT, weekday } from '../lib/dates'
-import { canMove, canUnmark, type DayState } from '../lib/rules/planning'
+import { canMove, canUnmark, unmarkWarning, type DayState } from '../lib/rules/planning'
 import { Sheet } from './ui'
 import type { ExcuseType, PlannedDay } from '../data/types'
 
@@ -30,6 +30,7 @@ export function DayActions({ day, onClose }: { day: PlannedDay | null; onClose: 
   const mine = snap.plannedDays.filter((d) => d.profile_id === me.id)
   const ctx = { today, days: mine, sessions: snap.sessions, excuses: snap.excuses, closedMonths, minPerWeek: me.min_days_week }
   const unmark = canUnmark(day, ctx)
+  const unmarkWarn = unmark.ok ? unmarkWarning(day, ctx) : null
   const canChange = st === 'planned' || st === 'today' || st === 'recover'
   const canExcuse = st === 'recover' || st === 'today'
   const mk = monthKey(day.date)
@@ -62,6 +63,7 @@ export function DayActions({ day, onClose }: { day: PlannedDay | null; onClose: 
             <div className="stack-sm">
               <button className="btn danger block" disabled={!unmark.ok} aria-describedby={unmark.ok ? undefined : 'unmark-why'} onClick={() => run(() => api.removePlannedDay(day.id), 'Dia eliminado').then(close)}><Trash size={20} weight="bold" /> Eliminar este dia</button>
               {!unmark.ok && <p id="unmark-why" className="small muted">{unmark.reason}</p>}
+              {unmarkWarn && <p className="small" style={{ color: 'var(--warn)' }}>{unmarkWarn}</p>}
             </div>
           )}
         </div>

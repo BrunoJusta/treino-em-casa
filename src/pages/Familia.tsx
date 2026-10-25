@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { DotsThree, HandsClapping, Fire, Barbell } from '@phosphor-icons/react'
+import { DotsThree, HandsClapping, Fire, Barbell, Footprints } from '@phosphor-icons/react'
+import { RouteSvg } from '../components/walk/RouteSvg'
 import { useApp } from '../data/store'
 import { buildFeed, useFamily } from '../data/derived'
 import { api } from '../lib/config'
@@ -40,12 +41,34 @@ function Feed() {
   const { snap, me, run } = useApp()
   const [limit, setLimit] = useState(15)
   const [menu, setMenu] = useState<string | null>(null)
+  const [walkMenu, setWalkMenu] = useState<string | null>(null)
   const items = buildFeed(snap)
   if (!items.length) return <Empty title="Ainda não há nada no feed" text="O primeiro treino da família aparece aqui, com foto." mood="happy" />
   return (
     <section className="stack" style={{ gap: 16 }}>
       {items.slice(0, limit).map((it) => {
         const p = it.profile
+        if (it.kind === 'walk' && it.walk) {
+          const w = it.walk
+          const canDelete = w.profile_id === me.id
+          return (
+            <article key={it.id} className="post card walk-post">
+              <div className="row">
+                <div className="avatar-stack">
+                  {p && <Link to={`/perfil/${p.id}`} aria-label={p.display_name}><Avatar avatar={p.avatar} color={p.color} name={p.display_name} size={42} /></Link>}
+                  {(it.companions ?? []).map((c) => <Avatar key={c.id} avatar={c.avatar} color={c.color} name={c.display_name} size={32} />)}
+                </div>
+                <div className="grow"><p><strong>{p?.display_name}</strong> {it.text}</p><p className="tiny muted">{it.sub}, {timeAgo(it.at)}</p></div>
+                {canDelete && <button className="icon-btn plain" aria-label="Opções da caminhada" onClick={() => setWalkMenu(w.id)}><DotsThree size={24} weight="bold" /></button>}
+              </div>
+              {w.route && w.route.length > 1 && <RouteSvg route={w.route} label={`Percurso da caminhada de ${p?.display_name ?? ''}`} />}
+              <div className="row between">
+                <span className="walk-tag"><Footprints size={16} weight="bold" /> Caminhada</span>
+                {w.notes && <span className="small muted" style={{ textAlign: 'right' }}>{w.notes}</span>}
+              </div>
+            </article>
+          )
+        }
         if (it.kind !== 'session' || !it.session) {
           return (
             <div key={it.id} className={`card ${it.kind === 'penalty' ? 'warn' : it.kind === 'spend' ? 'accent' : 'soft'} row`}>
@@ -80,6 +103,10 @@ function Feed() {
         )
       })}
       {items.length > limit && <button className="btn secondary block" onClick={() => setLimit((l) => l + 15)}>Ver mais</button>}
+      <Sheet open={!!walkMenu} onClose={() => setWalkMenu(null)} title="A tua caminhada">
+        <p className="muted">Se apagares, a caminhada sai do feed e deixa de contar para as conquistas, tuas e de quem foi contigo.</p>
+        <button className="btn danger big block" onClick={() => run(() => api.deleteWalk(walkMenu!), 'Caminhada apagada').then(() => setWalkMenu(null))}>Apagar a caminhada</button>
+      </Sheet>
       <Sheet open={!!menu} onClose={() => setMenu(null)} title="A tua foto">
         <p className="muted">Se apagares a foto, sai do feed. O treino continua a contar, porque a prova ficou registada com a data e a hora.</p>
         <button className="btn danger big block" onClick={() => run(() => api.hideSessionPhoto(menu!), 'Foto apagada').then(() => setMenu(null))}>Apagar a foto</button>

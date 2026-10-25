@@ -24,6 +24,12 @@
   --warn-soft: #fdf3e1;
   --ok: #2f7d1f;
   --ok-soft: #e8f5e4;
+  /* caminhadas: verde, para se distinguir do azul dos treinos */
+  --walk: #4cc56f;
+  --walk-ink: #0d3b1c;
+  --walk-text: #1d7a3a;
+  --walk-soft: #e6f7eb;
+  --walk-line: #b4e5c2;
   --gold: #f9c74f;
   --gold-soft: #fff6dc;
   --r-card: 20px;
@@ -365,3 +371,41 @@ button.cal-day { cursor: pointer; }
 .egg-hadestown { background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 7px); }
 .egg-hadestown .jar-quote-text { font-style: italic; }
 .egg-hungergames { background-image: radial-gradient(ellipse at 100% 100%, rgba(255, 138, 61, 0.35) 0 30px, transparent 60px); }
+
+/* ---------- Caminhadas ---------- */
+.btn.walk { background: var(--walk); color: var(--walk-ink); box-shadow: inset 0 -3px 0 rgba(13, 59, 28, 0.2); }
+.btn.walk:active { box-shadow: inset 0 -1px 0 rgba(13, 59, 28, 0.2); }
+.btn.walk-soft { background: var(--walk-soft); color: var(--walk-ink); border-color: var(--walk-line); }
+.card.walk { background: var(--walk-soft); border-color: var(--walk-line); }
+.chip.walk { background: var(--walk-soft); border-color: var(--walk-line); color: var(--walk-text); }
+.chip.walk-on { background: var(--walk); border-color: var(--walk); color: var(--walk-ink); }
+.walk-choice { display: flex; align-items: center; gap: 14px; text-align: left; padding: 16px; border-radius: 18px; border: 1.5px solid var(--walk-line); background: var(--walk-soft); color: var(--ink); width: 100%; font: inherit; cursor: pointer; }
+.walk-choice:active { transform: scale(0.985); }
+.walk-choice .ico { width: 48px; height: 48px; border-radius: 14px; background: var(--walk); color: var(--walk-ink); display: grid; place-items: center; flex-shrink: 0; }
+.walk-choice b { display: block; font-size: 17px; }
+.walk-choice span { font-size: 14px; color: var(--ink-2); }
+.walk-people { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.walk-person { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--bg); font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; }
+.walk-person[aria-pressed='true'] { border-color: var(--walk); background: var(--walk-soft); box-shadow: inset 0 0 0 1px var(--walk); }
+.walk-live { position: fixed; inset: 0; display: flex; flex-direction: column; background: var(--bg); z-index: 30; }
+.walk-map { flex: 1; min-height: 0; position: relative; background: var(--surface); }
+.walk-map .leaflet-container { width: 100%; height: 100%; font-family: inherit; background: var(--surface); }
+.walk-map-msg { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--ink-2); z-index: 1; pointer-events: none; }
+.walk-top { position: absolute; top: calc(10px + var(--safe-t)); left: 12px; right: 12px; z-index: 500; display: flex; justify-content: space-between; gap: 8px; pointer-events: none; }
+.walk-top > * { pointer-events: auto; }
+.walk-gps { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.94); box-shadow: var(--shadow); font-size: 13px; font-weight: 600; }
+.walk-gps i { width: 8px; height: 8px; border-radius: 50%; background: var(--walk); display: inline-block; }
+.walk-gps.weak i { background: #e5a50a; }
+.walk-gps.off i { background: var(--danger); }
+.walk-panel { background: var(--bg); border-radius: 26px 26px 0 0; box-shadow: var(--shadow-up); padding: 16px 16px calc(16px + var(--safe-b)); display: flex; flex-direction: column; gap: 14px; margin-top: -22px; position: relative; z-index: 600; }
+.walk-stats { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 8px; text-align: center; }
+.walk-stats b { display: block; font-size: 30px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.walk-stats span { font-size: 13px; color: var(--muted); font-weight: 600; }
+.walk-stats .main b { font-size: 38px; color: var(--walk-text); }
+.walk-route { width: 100%; height: auto; display: block; border-radius: 14px; background: var(--walk-soft); }
+.post.walk-post { border-color: var(--walk-line); background: linear-gradient(180deg, var(--walk-soft), var(--bg) 70%); }
+.walk-tag { display: inline-flex; align-items: center; gap: 6px; color: var(--walk-text); font-size: 13px; font-weight: 700; }
+.walk-banner { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; background: var(--walk); color: var(--walk-ink); text-decoration: none; font-weight: 700; }
+.walk-banner .num { font-variant-numeric: tabular-nums; }
+.leaflet-control-attribution { font-size: 10px; }
+.walk-map .leaflet-bottom { bottom: 22px; }

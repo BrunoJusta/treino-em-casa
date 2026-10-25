@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { computeMonthClose, shouldAutoApprove, monthsToClose } from './jar'
-import { autofillDates, canMove, canUnmark, checkMonthWeeks, weekRequirement } from './planning'
+import { autofillDates, canMove, canUnmark, unmarkWarning, checkMonthWeeks, weekRequirement } from './planning'
 import { addDays, todayLisbon, weekday } from '../dates'
 import type { Excuse, JarSettings, PlannedDay, Session } from '../../data/types'
 
@@ -106,11 +106,12 @@ describe('planeamento', () => {
     expect(canMove(a, '2026-12-01', ctx).ok).toBe(false)
   })
 
-  it('não deixa tirar um dia se a semana ficar abaixo do mínimo', () => {
+  it('deixa tirar um dia mesmo que a semana fique abaixo do mínimo, mas avisa', () => {
     const a = pd('2026-11-10')
     const b = pd('2026-11-12')
     const ctx = { today: '2026-11-05', days: [a, b], sessions: [], excuses: [], closedMonths: new Set<string>(), minPerWeek: 2 }
-    expect(canUnmark(a, ctx).ok).toBe(false)
+    expect(canUnmark(a, ctx).ok).toBe(true)
+    expect(unmarkWarning(a, ctx)).toContain('fica com 1 de 2')
   })
 
   it('a data de hoje é calculada em Lisboa', () => {

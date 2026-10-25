@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { CaretRight, Camera, GearSix, Play, CalendarPlus, Warning } from '@phosphor-icons/react'
+import { CaretRight, Camera, GearSix, Play, CalendarPlus, Warning, Footprints } from '@phosphor-icons/react'
 import { useApp } from '../data/store'
 import { useFamily, usePerson } from '../data/derived'
 import { Avatar } from '../components/Avatar'
@@ -15,6 +15,8 @@ import { euros } from '../lib/rules/jar'
 import { api, isDemo } from '../lib/config'
 import { names } from '../lib/format'
 import { addDays } from '../lib/dates'
+import { WalkSheet } from '../components/walk/WalkSheet'
+import { elapsedMs, fmtClock, loadLive, type LiveWalk } from '../lib/walk'
 import { EGG_STYLE, nextQuote, type EggKind, type Quote } from '../lib/quotes'
 import { ArrowFatLinesUp, BugBeetle, Disc, Fire, Flower, GameController, Spiral, Carrot, Circle, DiceFive, Dog, Ear, Egg, HandFist, Lamp, Lightning, Moon, Radio, ShieldStar, SoccerBall, Sparkle, Sword, TreeEvergreen, Waves, Wind } from '@phosphor-icons/react'
 import { sfx } from '../lib/fx'
@@ -48,6 +50,7 @@ export function Hoje() {
   const firstRecover = p.recover[0]
   const mood = p.todaySession ? 'party' : risk ? 'sad' : 'happy'
   const [weighIn, setWeighIn] = useState(false)
+  const [walkOpen, setWalkOpen] = useState(false)
   useEffect(() => {
     api.getBody().then(({ profile, metrics }) => {
       const last = metrics.map((m) => m.date).sort().at(-1)
@@ -126,7 +129,12 @@ export function Hoje() {
 
       {isDemo && <div className="demo-banner">Modo demo: ainda sem Supabase ligado. Experimenta à vontade.</div>}
 
+      <LiveWalkBanner />
+
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}>{hero}</motion.div>
+
+      <button className="btn walk-soft big block" onClick={() => setWalkOpen(true)}><Footprints size={22} weight="bold" /> Registar caminhada</button>
+      <WalkSheet open={walkOpen} onClose={() => setWalkOpen(false)} />
 
       {pendingExcuses.length > 0 && (
         <Link to="/admin/desculpas" className="card warn tap row" style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -268,4 +276,26 @@ function EggIcon({ kind }: { kind: EggKind }) {
     case 'hadestown': return <Flower {...p} />
     case 'hungergames': return <Fire {...p} />
   }
+}
+
+// Caminhada a decorrer: aparece no topo do Hoje para voltar ao mapa.
+function LiveWalkBanner() {
+  const [live, setLive] = useState<LiveWalk | null>(() => loadLive())
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    const upd = () => setLive(loadLive())
+    window.addEventListener('tec-walk-live', upd)
+    window.addEventListener('focus', upd)
+    const t = setInterval(() => setTick((x) => x + 1), 1000)
+    return () => { window.removeEventListener('tec-walk-live', upd); window.removeEventListener('focus', upd); clearInterval(t) }
+  }, [])
+  if (!live) return null
+  return (
+    <Link to="/caminhada" className="walk-banner">
+      <Footprints size={24} weight="bold" />
+      <span className="grow">{live.pausedAt ? 'Caminhada em pausa' : 'Caminhada a decorrer'}</span>
+      <span className="num">{fmtClock(elapsedMs(live))}</span>
+      <CaretRight size={20} weight="bold" />
+    </Link>
+  )
 }

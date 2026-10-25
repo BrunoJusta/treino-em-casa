@@ -160,6 +160,23 @@ export interface JarSettings {
   family_goal_reward: string
 }
 
+// Caminhadas: complemento ao treino. Não dão XP nem contam como dia marcado,
+// mas aparecem no feed e desbloqueiam conquistas próprias.
+export interface Walk {
+  id: string
+  profile_id: string // quem registou
+  companions: string[] // outras pessoas da família que foram também
+  date: string
+  started_at: string
+  ended_at: string
+  duration_s: number
+  distance_m: number | null // null = sem distância (registo manual sem km)
+  route: [number, number][] | null // [lat, lng], simplificado
+  source: 'manual' | 'live'
+  notes: string
+  created_at: string
+}
+
 export interface Reaction {
   id: string
   session_id: string
@@ -213,6 +230,7 @@ export interface Snapshot {
   audit: AuditEntry[]
   exerciseOverrides: Record<string, Partial<Exercise>>
   customExercises: Exercise[]
+  walks: Walk[]
 }
 
 export interface LoginProfile {

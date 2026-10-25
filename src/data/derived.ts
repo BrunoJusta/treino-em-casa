@@ -3,7 +3,9 @@ import { cmp, monthKey, monthName } from '../lib/dates'
 import { riskPreview, jarTotals } from '../lib/rules/jar'
 import { familyGoalProgress, levelFor, streakFor, xpFor, countedSessions } from '../lib/rules/game'
 import { useApp } from './store'
-import type { JarEntry, PlannedDay, Profile, Session, Snapshot } from './types'
+import type { JarEntry, PlannedDay, Profile, Session, Snapshot, Walk } from './types'
+import { names } from '../lib/format'
+import { fmtDuration, fmtKm } from '../lib/walk'
 
 export function usePerson(profile: Profile | null) {
   const { snap, today, stateOf } = useApp()
@@ -36,9 +38,11 @@ export function useFamily() {
 export interface FeedItem {
   id: string
   at: string
-  kind: 'session' | 'penalty' | 'spend' | 'excuse' | 'close' | 'paid'
+  kind: 'session' | 'walk' | 'penalty' | 'spend' | 'excuse' | 'close' | 'paid'
   profile: Profile | null
   session?: Session
+  walk?: Walk
+  companions?: Profile[]
   text: string
   sub?: string
 }
@@ -49,6 +53,14 @@ export function buildFeed(snap: Snapshot): FeedItem[] {
   for (const s of snap.sessions) {
     const plan = snap.plans.find((p) => p.id === s.plan_id)
     items.push({ id: `s-${s.id}`, at: s.ended_at, kind: 'session', profile: byId.get(s.profile_id) ?? null, session: s, text: plan ? `fez ${plan.name}` : 'treinou', sub: `${s.minutes} min` })
+  }
+  for (const w of snap.walks ?? []) {
+    const comp = w.companions.map((c) => byId.get(c)).filter((x): x is Profile => !!x)
+    items.push({
+      id: `w-${w.id}`, at: w.ended_at, kind: 'walk', profile: byId.get(w.profile_id) ?? null, walk: w, companions: comp,
+      text: comp.length ? `foi caminhar com ${names(comp.map((c) => c.display_name))}` : 'foi caminhar',
+      sub: [fmtKm(w.distance_m), fmtDuration(w.duration_s)].filter(Boolean).join(', '),
+    })
   }
   // multas agrupadas por pessoa e fecho de mês, para o feed não ficar cheio de moedas
   const groups = new Map<string, JarEntry[]>()

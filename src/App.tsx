@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useStore } from './data/store'
 import { BottomNav, CelebrationOverlay, Toasts } from './components/ui'
@@ -16,9 +16,11 @@ import { Jarro } from './pages/Jarro'
 import { Familia } from './pages/Familia'
 import { Perfil } from './pages/Perfil'
 import { Corpo } from './pages/Corpo'
+// o mapa (Leaflet) só se carrega quando alguém começa uma caminhada
+const Caminhada = lazy(() => import('./pages/Caminhada'))
 import { Admin } from './pages/admin/Admin'
 
-const NO_NAV = ['/treinar', '/player', '/planos/', '/admin']
+const NO_NAV = ['/treinar', '/player', '/planos/', '/admin', '/caminhada']
 
 export function App() {
   const { me, loading, snap, error } = useStore()
@@ -47,6 +49,7 @@ export function App() {
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/perfil/:id" element={<Perfil />} />
         <Route path="/corpo" element={<Corpo />} />
+        <Route path="/caminhada" element={<Suspense fallback={<Splash />}><Caminhada /></Suspense>} />
         <Route path="/admin/*" element={<Admin />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

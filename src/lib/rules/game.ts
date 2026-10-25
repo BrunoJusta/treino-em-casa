@@ -1,5 +1,5 @@
 import { addDays, cmp, monthKey, weekStart, TZ } from '../dates'
-import type { Excuse, MonthClosure, PlannedDay, Profile, Reaction, Session, Snapshot } from '../../data/types'
+import type { Excuse, MonthClosure, PlannedDay, Profile, Reaction, Session, Snapshot, Walk } from '../../data/types'
 
 export const XP = {
   plannedDay: 50,
@@ -162,6 +162,7 @@ export interface Badge {
   icon: string // PixelIcon
   tier: 'bronze' | 'prata' | 'ouro' | 'especial'
   collective?: boolean
+  walk?: boolean // conquistas das caminhadas (não dão XP)
 }
 
 export const BADGES: Badge[] = [
@@ -180,7 +181,47 @@ export const BADGES: Badge[] = [
   { code: 'family', name: 'Família completa', description: 'Toda a gente treinou na mesma semana.', icon: 'house', tier: 'especial', collective: true },
   { code: 'emptyjar', name: 'Jarro vazio', description: 'Um mês inteiro sem ninguém pagar.', icon: 'jar', tier: 'especial', collective: true },
   { code: 'goal', name: 'Meta da família', description: 'A família cumpriu a meta do mês.', icon: 'flag', tier: 'especial', collective: true },
+  // caminhadas
+  { code: 'walk1', name: 'Primeira caminhada', description: 'Registaste a tua primeira caminhada.', icon: 'boot', tier: 'bronze', walk: true },
+  { code: 'walk10', name: '10 caminhadas', description: '10 caminhadas registadas.', icon: 'boot', tier: 'prata', walk: true },
+  { code: 'walk25', name: '25 caminhadas', description: '25 caminhadas. Já conheces as ruas todas.', icon: 'boot', tier: 'ouro', walk: true },
+  { code: 'km10', name: '10 km a andar', description: '10 km somados em caminhadas.', icon: 'flag', tier: 'bronze', walk: true },
+  { code: 'km50', name: '50 km a andar', description: '50 km somados em caminhadas.', icon: 'flag', tier: 'prata', walk: true },
+  { code: 'km100', name: '100 km a andar', description: '100 km somados em caminhadas.', icon: 'trophy', tier: 'ouro', walk: true },
+  { code: 'walk5k', name: '5 km de seguida', description: 'Uma caminhada com 5 km ou mais.', icon: 'star', tier: 'prata', walk: true },
+  { code: 'walk60', name: 'Uma hora a andar', description: 'Uma caminhada com uma hora ou mais.', icon: 'sun', tier: 'prata', walk: true },
+  { code: 'walkgroup', name: 'Passeio em família', description: 'Uma caminhada com mais duas pessoas da família.', icon: 'heart', tier: 'especial', walk: true },
 ]
+
+/** Caminhadas em que a pessoa foi: as que registou e as em que foi acompanhante. */
+export function walksOf(profileId: string, walks: Walk[] | undefined): Walk[] {
+  return (walks ?? []).filter((w) => w.profile_id === profileId || w.companions.includes(profileId)).sort((a, b) => cmp(a.started_at, b.started_at))
+}
+
+export function walkTotals(profileId: string, walks: Walk[] | undefined) {
+  const mine = walksOf(profileId, walks)
+  return { count: mine.length, meters: mine.reduce((a, w) => a + (w.distance_m ?? 0), 0), seconds: mine.reduce((a, w) => a + w.duration_s, 0) }
+}
+
+function walkBadges(profileId: string, walks: Walk[] | undefined): { code: string; at: string }[] {
+  const out: { code: string; at: string }[] = []
+  const mine = walksOf(profileId, walks)
+  for (const [k, c] of [[1, 'walk1'], [10, 'walk10'], [25, 'walk25']] as const) if (mine.length >= k) out.push({ code: c, at: mine[k - 1].ended_at })
+  let acc = 0
+  const km: [number, string][] = [[10000, 'km10'], [50000, 'km50'], [100000, 'km100']]
+  for (const w of mine) {
+    const before = acc
+    acc += w.distance_m ?? 0
+    for (const [m, c] of km) if (before < m && acc >= m) out.push({ code: c, at: w.ended_at })
+  }
+  const far = mine.find((w) => (w.distance_m ?? 0) >= 5000)
+  if (far) out.push({ code: 'walk5k', at: far.ended_at })
+  const long = mine.find((w) => w.duration_s >= 3600)
+  if (long) out.push({ code: 'walk60', at: long.ended_at })
+  const group = mine.find((w) => w.companions.length >= 2)
+  if (group) out.push({ code: 'walkgroup', at: group.ended_at })
+  return out
+}
 
 function hourOf(iso: string) {
   return Number(new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', hour12: false }).format(new Date(iso)))
@@ -218,6 +259,7 @@ export function badgesFor(profile: Profile, today: string, snap: Snapshot, exerc
   for (const s of snap.sessions.filter((s) => s.profile_id === profile.id)) for (const set of s.sets) for (const e of exerciseEquip.get(set.exercise_id) ?? []) used.add(e)
   if (okEquip.length && okEquip.every((e) => used.has(e))) out.push({ code: 'explorer', at: today })
   for (const c of collectiveBadges(today, snap)) out.push(c)
+  for (const c of walkBadges(profile.id, snap.walks)) out.push(c)
   return out
 }
 
