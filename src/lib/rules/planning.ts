@@ -5,9 +5,11 @@ import type { Excuse, PlannedDay, Session } from '../../data/types'
  * Mínimo de dias numa semana (segunda a domingo) dentro de um mês.
  * As semanas cortadas no início e no fim do mês têm o mínimo proporcional:
  * com 4 dias ou menos dentro do mês, pede metade (arredondada para cima).
+ * Uma semana com um só dia no mês não tem mínimo.
  */
 export function weekRequirement(daysInMonthForWeek: number, minPerWeek: number): number {
   if (daysInMonthForWeek >= 5) return minPerWeek
+  if (daysInMonthForWeek <= 1) return 0
   return Math.min(daysInMonthForWeek, Math.ceil(minPerWeek / 2))
 }
 

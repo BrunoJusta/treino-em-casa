@@ -80,14 +80,18 @@ describe('planeamento', () => {
     expect(weekRequirement(5, 2)).toBe(2)
     expect(weekRequirement(4, 2)).toBe(1)
     expect(weekRequirement(3, 2)).toBe(1)
-    expect(weekRequirement(1, 2)).toBe(1)
+    expect(weekRequirement(2, 2)).toBe(1)
+    expect(weekRequirement(1, 2)).toBe(0)
   })
 
   it('novembro 2026: 1 dom (semana de 1 dia) + 4 semanas + seg 30', () => {
     const w = checkMonthWeeks('2026-11', [], 2)
     expect(w[0].days).toEqual(['2026-11-01'])
-    expect(w[0].required).toBe(1)
+    expect(w[0].required).toBe(0)
+    expect(w[0].ok).toBe(true)
     expect(w.at(-1)!.days).toEqual(['2026-11-30'])
+    expect(w.at(-1)!.required).toBe(0)
+    expect(w.reduce((a, x) => a + x.required, 0)).toBe(8)
   })
 
   it('preenchimento automático completa semanas com os dias do mês anterior', () => {

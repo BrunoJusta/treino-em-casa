@@ -66,7 +66,7 @@ export function MyPlanner({ mk }: { mk: string }) {
         <div className="grow">
           <p className="strong num">{marked.length} dias marcados, mínimo {required}</p>
           <p className="small" style={{ color: 'var(--ink-2)' }}>
-            {allOk ? 'Todas as semanas têm o mínimo. Podes mudar os dias quando quiseres, dentro do mês.' : `Pelo menos ${me.min_days_week} dias por semana (1 nas semanas cortadas). Podes marcar mais dias à vontade.`}
+            {allOk ? 'Todas as semanas têm o mínimo. Podes mudar os dias quando quiseres, dentro do mês.' : `Pelo menos ${me.min_days_week} dias por semana (1 nas semanas cortadas, nenhum nas semanas com um só dia). Podes marcar mais dias à vontade.`}
           </p>
         </div>
       </div>
@@ -94,7 +94,9 @@ export function MyPlanner({ mk }: { mk: string }) {
         {weeks.map((w) => (
           <div key={w.start} className="list-item" style={{ minHeight: 48, padding: '10px 16px' }}>
             <span className="grow small">{w.days.length === 1 ? `Semana só com o dia ${dayOfMonth(w.days[0])}` : `Semana de ${dayOfMonth(w.days[0])} a ${dayOfMonth(w.days.at(-1)!)}`}</span>
-            <span className={`chip ${w.ok ? 'ok' : 'warn'} num`}>{w.count}/{w.required}</span>
+            {w.required === 0
+              ? <span className={`chip ${w.count ? 'ok' : ''}`}>{w.count ? `${w.count} marcado` : 'Sem mínimo'}</span>
+              : <span className={`chip ${w.ok ? 'ok' : 'warn'} num`}>{w.count}/{w.required}</span>}
           </div>
         ))}
       </section>

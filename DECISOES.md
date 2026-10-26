@@ -19,7 +19,7 @@ Registo das decisões fechadas com o Bruno antes de construir. Quando uma regra 
 ## Planeamento
 
 - Mínimo de **2 dias por semana** (de segunda a domingo).
-- Semanas cortadas no início e no fim do mês: 4 dias ou menos no mês pedem 1 dia, 5 ou mais pedem 2 (outubro de 2026: 1 + 2 + 2 + 2 + 2 = 9).
+- Semanas cortadas no início e no fim do mês: 1 só dia no mês não tem mínimo, 2 a 4 dias pedem 1 dia, 5 ou mais pedem 2 (outubro de 2026: 1 + 2 + 2 + 2 + 2 = 9).
 - Planeia-se do **dia 1 ao dia 5** (recomendado). A app **nunca marca dias sozinha**, a não ser que a pessoa ligue "Repetir todas as semanas" no Calendário > O meu: aí copia os dias (e o treino de cada um) da primeira semana marcada para o resto do mês e para o mês seguinte, e no dia 1 de cada mês preenche o mês novo.
 - O mínimo é 2 dias por semana (1 nas semanas cortadas), mas cada pessoa pode marcar **quantos dias quiser**.
 - Tocar num dia no Calendário marca-o e abre logo os detalhes para escolher o treino.

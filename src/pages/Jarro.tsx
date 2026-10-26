@@ -96,7 +96,7 @@ export function Jarro() {
 
       <Sheet open={rules} onClose={() => setRules(false)} title="Regras do jarro">
         <ul className="small" style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <li>Cada pessoa marca pelo menos {me.min_days_week} dias por semana (1 nas semanas cortadas do mês). Planeia-se de dia 1 a {s.plan_window_end_day}.</li>
+          <li>Cada pessoa marca pelo menos {me.min_days_week} dias por semana (1 nas semanas cortadas do mês, nenhum nas semanas com um só dia). Planeia-se de dia 1 a {s.plan_window_end_day}.</li>
           <li>Os dias mudam-se quando quiseres, dentro do mesmo mês. Um dia que passou sem treino fica "por recuperar".</li>
           <li>No dia 1 fecha-se o mês anterior. Cada falha a partir da segunda seguida custa {euros(s.penalty_cents)}.</li>
           <li>Um treino feito, ou uma desculpa aprovada, põe o contador a zero. O contador não passa de um mês para o outro.</li>
