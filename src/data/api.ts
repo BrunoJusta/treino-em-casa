@@ -94,8 +94,8 @@ export interface DataApi {
 }
 
 export const DEFAULT_SETTINGS: JarSettings = {
-  penalty_cents: 500,
-  consecutive_misses: 2,
+  penalty_cents: 250,
+  consecutive_misses: 1,
   monthly_cap_cents: 1500,
   plan_window_end_day: 5,
   excuse_auto_day: 5,

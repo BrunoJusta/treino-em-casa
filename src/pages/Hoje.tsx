@@ -9,9 +9,9 @@ import { JarMascot } from '../components/pixel/JarMascot'
 import { PixelIcon } from '../components/pixel/Pixel'
 import { Bar, Photo, ProfileLink } from '../components/ui'
 import { InstallCard } from '../components/InstallCard'
-import { dayOfMonth, longDate, monthKey, monthName, hourLisbon, daysInMonth } from '../lib/dates'
+import { dayOfMonth, longDate, monthKey, monthName, hourLisbon } from '../lib/dates'
 import { checkMonthWeeks } from '../lib/rules/planning'
-import { euros } from '../lib/rules/jar'
+import { euros, riskText } from '../lib/rules/jar'
 import { api, isDemo } from '../lib/config'
 import { names } from '../lib/format'
 import { addDays } from '../lib/dates'
@@ -46,7 +46,7 @@ export function Hoje() {
   const inWindow = dayOfMonth(today) <= snap.settings.plan_window_end_day
   const pendingExcuses = isAdmin ? snap.excuses.filter((e) => e.status === 'pending') : []
   const trainedToday = snap.profiles.filter((x) => snap.sessions.some((s) => s.profile_id === x.id && s.date === today))
-  const risk = p.risk.atRisk.reduce((s, x) => s + x.amount_cents, 0)
+  const risk = p.risk.certain_cents + p.risk.recoverable_cents
   const firstRecover = p.recover[0]
   const mood = p.todaySession ? 'party' : risk ? 'sad' : 'happy'
   const [weighIn, setWeighIn] = useState(false)
@@ -148,8 +148,8 @@ export function Hoje() {
         <div className="card danger row">
           <JarMascot mood="wow" level={0.3} size={46} bounce={false} />
           <div className="grow">
-            <p className="strong">Se o mês fechasse hoje, ias pôr {euros(risk)} no jarro</p>
-            <p className="small" style={{ color: 'var(--ink-2)' }}>Muda um dos dias falhados para um dia livre até {daysInMonth(mk)} de {monthName(mk)} e treina.</p>
+            <p className="strong">{p.risk.certain_cents ? `Se o mês fechasse hoje, ias pôr ${euros(risk)} no jarro` : `Se não recuperares até domingo, vais pôr ${euros(risk)} no jarro`}</p>
+            <p className="small" style={{ color: 'var(--ink-2)' }}>{riskText(p.risk, snap.settings)}</p>
           </div>
         </div>
       )}

@@ -1,11 +1,13 @@
-import { cmp, dayOfMonth, monthKey, nextMonth } from '../dates'
+import { cmp, dayOfMonth, monthKey, monthName, nextMonth, weekStart } from '../dates'
 import type { Excuse, JarEntry, JarSettings, MonthClosure, PlannedDay, Profile, Session } from '../../data/types'
 
 /*
  * Regras do jarro (decididas com a família):
- * - Durante o mês, um dia marcado que passou sem treino fica "Por recuperar" e pode ser mudado para outro dia do mesmo mês.
+ * - Um dia marcado que passou sem treino fica "Por recuperar" até ao fim dessa semana (domingo) e pode ser mudado para outro dia dessa semana.
+ *   Depois de a semana acabar conta como falha e já não se muda.
  * - No dia 1 às 00h15 fecha-se o mês anterior. Só aí as falhas ficam definitivas.
- * - Multa de 5 € por cada falha a partir da segunda seguida (falha, falha = 5 €, mais uma falha = mais 5 €).
+ * - Multa por cada falha (2,50 € desde novembro de 2026). Nas regras, "a partir da falha n.º" = 1 faz cada falha contar sozinha;
+ *   com 2 só conta a partir da segunda seguida (era a regra antiga: 5 €).
  * - Um treino feito, ou uma desculpa aprovada, põe o contador a zero. O contador não passa de um mês para o outro.
  * - Teto de 15 € por pessoa por mês.
  * - Quem tem desculpas por decidir espera. No dia 5 às 23h59 as desculpas pendentes do mês anterior são aceites.
@@ -90,9 +92,16 @@ export function monthsToClose(profileId: string, today: string, days: PlannedDay
 }
 
 /** Pré-visualização do risco durante o mês: o que aconteceria se o mês fechasse agora. */
-export function riskPreview(input: PersonMonthInput, settings: JarSettings, today: string): { atRisk: PenaltyDraft[]; streak: number } {
+export function riskPreview(input: PersonMonthInput, settings: JarSettings, today: string): { atRisk: PenaltyDraft[]; streak: number; certain_cents: number; recoverable_cents: number } {
   const pastDays = input.days.filter((d) => cmp(d.date, today) < 0)
   const res = computeMonthClose({ ...input, days: pastDays }, settings)
+  // Os dias falhados desta semana ainda se recuperam até domingo; os de semanas que já passaram são falhas certas.
+  const thisWeek = weekStart(today)
+  const certain = computeMonthClose({ ...input, days: pastDays.filter((d) => weekStart(d.date) !== thisWeek) }, settings)
+  const sum = (ps: PenaltyDraft[]) => ps.reduce((a, x) => a + x.amount_cents, 0)
+  // com multa por falha, as das semanas que já acabaram são lançadas logo no fecho da semana (já estão no jarro)
+  const certain_cents = weeklyClose(settings) ? 0 : sum(certain.penalties)
+  const recoverable_cents = Math.max(0, sum(res.penalties) - sum(certain.penalties))
   // falhas seguidas no fim (as mais recentes)
   const sorted = pastDays.filter((d) => d.profile_id === input.profileId && monthKey(d.date) === input.monthKey).sort((a, b) => cmp(a.date, b.date))
   const done = new Set(input.sessions.filter((s) => s.profile_id === input.profileId).map((s) => s.date))
@@ -103,7 +112,7 @@ export function riskPreview(input: PersonMonthInput, settings: JarSettings, toda
     if (done.has(d.date) || d.status === 'done' || approvedOrPending.has(d.id) || d.status === 'excused') break
     streak++
   }
-  return { atRisk: res.penalties, streak }
+  return { atRisk: res.penalties, streak, certain_cents, recoverable_cents }
 }
 
 export function jarTotals(jar: JarEntry[]) {
@@ -130,4 +139,38 @@ export function owedBy(jar: JarEntry[], profiles: Profile[]) {
 export function euros(cents: number): string {
   const v = cents / 100
   return `${Number.isInteger(v) ? v : v.toFixed(2).replace('.', ',')} €`
+}
+
+/** Quando cada falha conta sozinha, a multa é lançada no fecho da semana (segunda-feira) e não no fecho do mês. */
+export function weeklyClose(settings: JarSettings): boolean {
+  return settings.consecutive_misses <= 1
+}
+
+/** Multa do fecho da semana para um dia falhado (respeita o teto do mês). Devolve null se o teto já foi atingido. */
+export function weekPenaltyFor(profileId: string, date: string, jar: JarEntry[], settings: JarSettings): Omit<JarEntry, 'id' | 'created_at' | 'created_by'> | null {
+  const mk = monthKey(date)
+  const already = jar.filter((j) => j.profile_id === profileId && j.kind === 'penalty' && j.month_key === mk && j.status !== 'void').reduce((a, j) => a + j.amount_cents, 0)
+  const amount = Math.min(settings.penalty_cents, settings.monthly_cap_cents - already)
+  if (amount <= 0) return null
+  return { profile_id: profileId, kind: 'penalty', amount_cents: amount, reason: `Falha no dia ${dayOfMonth(date)} de ${monthName(mk)}`, related_days: [date], status: 'unpaid', month_key: mk }
+}
+
+/** Anula a multa por pagar de um dia (desculpa aprovada depois do fecho da semana). */
+export function voidDayPenalty(jar: JarEntry[], profileId: string, date: string) {
+  for (const j of jar) {
+    if (j.kind === 'penalty' && j.profile_id === profileId && j.status === 'unpaid' && j.related_days.length === 1 && j.related_days[0] === date) {
+      j.status = 'void'
+      j.reason = `${j.reason} (anulada: desculpa aprovada)`
+    }
+  }
+}
+
+/** Texto do aviso de risco: separa o que ainda se recupera esta semana do que já é certo. */
+export function riskText(r: { certain_cents: number; recoverable_cents: number }, settings?: JarSettings): string {
+  const parts: string[] = []
+  if (r.recoverable_cents > 0) parts.push(settings && weeklyClose(settings)
+    ? `Recupera os dias falhados desta semana até domingo. Se não, na segunda-feira são lançados ${euros(r.recoverable_cents)} no jarro.`
+    : `Recupera um dos dias falhados desta semana até domingo e poupas ${euros(r.recoverable_cents)}.`)
+  if (r.certain_cents > 0) parts.push(`${euros(r.certain_cents)} já ${r.certain_cents === 100 ? 'é certo' : 'são certos'}: os dias de semanas que já passaram contam como falha e a multa é lançada no fecho do mês.`)
+  return parts.join(' ')
 }

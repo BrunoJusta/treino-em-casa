@@ -32,7 +32,9 @@ export function DayActions({ day, onClose }: { day: PlannedDay | null; onClose: 
   const unmark = canUnmark(day, ctx)
   const unmarkWarn = unmark.ok ? unmarkWarning(day, ctx) : null
   const canChange = st === 'planned' || st === 'today' || st === 'recover'
-  const canExcuse = st === 'recover' || st === 'today'
+  const monthClosed = closedMonths.has(`${day.profile_id}:${monthKey(day.date)}`)
+  // a desculpa (doença, viagem...) pode pedir-se até o mês fechar, mesmo depois de a semana passar
+  const canExcuse = st === 'recover' || st === 'today' || (st === 'missed' && !monthClosed)
   const mk = monthKey(day.date)
   const targets = monthDays(mk).filter((d) => cmp(d, today) >= 0)
   const plan = snap.plans.find((p) => p.id === day.plan_id)
@@ -46,7 +48,8 @@ export function DayActions({ day, onClose }: { day: PlannedDay | null; onClose: 
             {day.auto_filled && <span className="chip">Repetição semanal</span>}
             {day.moved_from && <span className="chip">Veio do dia {dayOfMonth(day.moved_from)}</span>}
           </div>
-          {st === 'recover' && <p className="small" style={{ color: 'var(--ink-2)' }}>Este dia já passou sem treino. Muda-o para hoje ou para um dia livre deste mês e treina nesse dia. Se não o recuperares, conta como falha no fecho do mês.</p>}
+          {st === 'recover' && <p className="small" style={{ color: 'var(--ink-2)' }}>Este dia já passou sem treino. Muda-o para hoje ou para um dia livre desta semana (até domingo) e treina nesse dia. Se não o recuperares até domingo, conta como falha.</p>}
+          {st === 'missed' && !monthClosed && <p className="small" style={{ color: 'var(--ink-2)' }}>A semana deste dia já passou sem treino, por isso conta como falha e já não se muda. Se houve um motivo (doença, lesão, viagem), ainda podes pedir desculpa até o mês fechar: se for aprovada, a multa é anulada.</p>}
           {canChange && (
             <label className="field">
               <span>Treino para este dia</span>
@@ -70,7 +73,7 @@ export function DayActions({ day, onClose }: { day: PlannedDay | null; onClose: 
       )}
       {mode === 'move' && (
         <div className="stack">
-          <p className="small" style={{ color: 'var(--ink-2)' }}>Escolhe o dia novo. Só dá para dias deste mês, de hoje em diante, que ainda não estejam marcados.</p>
+          <p className="small" style={{ color: 'var(--ink-2)' }}>{st === 'recover' ? 'Escolhe o dia novo. Um dia falhado só se recupera nesta semana: de hoje até domingo, num dia que ainda não esteja marcado.' : 'Escolhe o dia novo. Só dá para dias deste mês, de hoje em diante, que ainda não estejam marcados.'}</p>
           <div className="cal">
             {WEEKDAY_SHORT.map((w, i) => <div key={i} className="cal-head">{w}</div>)}
             {Array.from({ length: weekday(`${mk}-01`) }, (_, i) => <div key={`e${i}`} />)}

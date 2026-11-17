@@ -23,8 +23,9 @@ Registo das decisões fechadas com o Bruno antes de construir. Quando uma regra 
 - Planeia-se do **dia 1 ao dia 5** (recomendado). A app **nunca marca dias sozinha**, a não ser que a pessoa ligue "Repetir todas as semanas" no Calendário > O meu: aí copia os dias (e o treino de cada um) da primeira semana marcada para o resto do mês e para o mês seguinte, e no dia 1 de cada mês preenche o mês novo.
 - O mínimo é 2 dias por semana (1 nas semanas cortadas), mas cada pessoa pode marcar **quantos dias quiser**.
 - Tocar num dia no Calendário marca-o e abre logo os detalhes para escolher o treino.
-- Os dias mudam-se a qualquer altura **dentro do mês**, incluindo dias que já passaram e foram falhados. Nada passa para o mês seguinte.
-- O mínimo semanal conta só no planeamento. Para recuperar dias, pode usar-se qualquer semana do mês.
+- Os dias mudam-se a qualquer altura **dentro do mês**. Nada passa para o mês seguinte.
+- Um dia falhado fica "Por recuperar" só **até ao fim da sua semana** (domingo) e só se muda para um dia dessa semana. Quando a semana acaba conta como falha e já não se muda (a desculpa ainda se pode pedir até o mês fechar). Decidido a 17 de novembro de 2026.
+- O mínimo semanal conta só no planeamento.
 - Só se tira um dia (sem o mudar) se a semana continuar com o mínimo.
 
 ## Registo do treino
@@ -38,11 +39,13 @@ Registo das decisões fechadas com o Bruno antes de construir. Quando uma regra 
 
 ## Jarro
 
-- **5 € por cada falha a partir da segunda seguida** (falha, falha = 5 €; mais uma = mais 5 €).
-- Um treino feito, ou uma desculpa aprovada, põe o contador a zero.
-- Durante o mês, os dias falhados ficam "Por recuperar", com aviso de risco.
-- No **dia 1 às 00h15** (Lisboa) fecha-se o mês anterior e lançam-se as multas. O contador não passa de um mês para o outro.
-- Teto de **15 € por pessoa por mês**.
+- **2,50 € por cada dia falhado**, sem precisar de ser seguido (decidido a 17 de novembro de 2026; vale a partir do fecho de novembro). Antes era 5 € por cada falha a partir da segunda seguida.
+- Um treino feito ou uma desculpa aprovada evita a falha desse dia.
+- Durante a semana, os dias falhados ficam "Por recuperar", com aviso de risco. Depois do domingo passam a falha certa.
+- A multa é lançada no **fecho da semana**: na segunda-feira (manutenção de hora a hora), cada dia marcado da semana anterior sem treino nem desculpa passa a falha e a multa entra logo no jarro como "por pagar". Decidido a 17 de novembro de 2026.
+- No **dia 1 às 00h15** (Lisboa) fecha-se o mês anterior: trata os dias que ainda faltam (a última semana do mês) sem repetir multas.
+- Uma desculpa aprovada depois de a multa ser lançada anula-a, se ainda estiver por pagar. Se já foi paga, o admin corrige no Jarro.
+- Teto de **15 € por pessoa por mês** (6 falhas).
 - Desculpas (doente, lesão, viagem, outro) são aprovadas pelo admin. O admin aprova as suas, com registo na auditoria e no feed.
 - Desculpa pendente: o dia não conta como falha. O fecho do mês dessa pessoa espera pela decisão. Se no **dia 5 às 23h59** ainda não houver decisão, é aceite automaticamente.
 - O dinheiro é gasto em conjunto. A app não mexe em dinheiro real.
