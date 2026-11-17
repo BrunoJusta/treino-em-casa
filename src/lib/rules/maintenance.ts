@@ -37,7 +37,7 @@ export function runMaintenanceOn(snap: Snapshot, today: string, uid: () => strin
         total += pen.amount_cents
         s.jar.push({
           id: uid(), profile_id: p.id, kind: 'penalty', amount_cents: pen.amount_cents,
-          reason: `Falhas seguidas nos dias ${pen.related_days.map((d) => dayOfMonth(d)).join(' e ')} de ${monthName(mk)}`,
+          reason: `${pen.related_days.length === 1 ? 'Falha no dia' : 'Falhas seguidas nos dias'} ${pen.related_days.map((d) => dayOfMonth(d)).join(' e ')} de ${monthName(mk)}`,
           related_days: pen.related_days, status: 'unpaid', month_key: mk, created_by: null, created_at: nowIso,
         })
       }

@@ -24,6 +24,14 @@ const ses = (date: string, profile_id = 'a'): Session => ({
 })
 
 describe('fecho do mês', () => {
+  it('com a regra nova, cada dia falhado custa 2,50 € (sem precisar de ser seguido)', () => {
+    const days = [pd('2026-11-03'), pd('2026-11-05'), pd('2026-11-10'), pd('2026-11-12')]
+    const sessions = [ses('2026-11-05')]
+    const r = computeMonthClose({ profileId: 'a', monthKey: '2026-11', days, sessions, excuses: [] }, { ...S, penalty_cents: 250, consecutive_misses: 1 })
+    expect(r.penalties.map((x) => x.amount_cents)).toEqual([250, 250, 250])
+    expect(r.penalties.map((x) => x.related_days)).toEqual([['2026-11-03'], ['2026-11-10'], ['2026-11-12']])
+  })
+
   it('falha, falha = 5 €; terceira falha seguida = mais 5 €', () => {
     const days = ['2026-11-02', '2026-11-04', '2026-11-06'].map((d) => pd(d))
     const r = computeMonthClose({ profileId: 'a', monthKey: '2026-11', days, sessions: [], excuses: [] }, S)

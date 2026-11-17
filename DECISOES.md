@@ -39,11 +39,11 @@ Registo das decisões fechadas com o Bruno antes de construir. Quando uma regra 
 
 ## Jarro
 
-- **5 € por cada falha a partir da segunda seguida** (falha, falha = 5 €; mais uma = mais 5 €).
-- Um treino feito, ou uma desculpa aprovada, põe o contador a zero.
+- **2,50 € por cada dia falhado**, sem precisar de ser seguido (decidido a 17 de novembro de 2026; vale a partir do fecho de novembro). Antes era 5 € por cada falha a partir da segunda seguida.
+- Um treino feito ou uma desculpa aprovada evita a falha desse dia.
 - Durante a semana, os dias falhados ficam "Por recuperar", com aviso de risco. Depois do domingo passam a falha certa.
 - No **dia 1 às 00h15** (Lisboa) fecha-se o mês anterior e lançam-se as multas. O contador não passa de um mês para o outro.
-- Teto de **15 € por pessoa por mês**.
+- Teto de **15 € por pessoa por mês** (6 falhas).
 - Desculpas (doente, lesão, viagem, outro) são aprovadas pelo admin. O admin aprova as suas, com registo na auditoria e no feed.
 - Desculpa pendente: o dia não conta como falha. O fecho do mês dessa pessoa espera pela decisão. Se no **dia 5 às 23h59** ainda não houver decisão, é aceite automaticamente.
 - O dinheiro é gasto em conjunto. A app não mexe em dinheiro real.

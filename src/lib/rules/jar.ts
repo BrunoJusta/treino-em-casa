@@ -6,7 +6,8 @@ import type { Excuse, JarEntry, JarSettings, MonthClosure, PlannedDay, Profile, 
  * - Um dia marcado que passou sem treino fica "Por recuperar" até ao fim dessa semana (domingo) e pode ser mudado para outro dia dessa semana.
  *   Depois de a semana acabar conta como falha e já não se muda.
  * - No dia 1 às 00h15 fecha-se o mês anterior. Só aí as falhas ficam definitivas.
- * - Multa de 5 € por cada falha a partir da segunda seguida (falha, falha = 5 €, mais uma falha = mais 5 €).
+ * - Multa por cada falha (2,50 € desde novembro de 2026). Nas regras, "a partir da falha n.º" = 1 faz cada falha contar sozinha;
+ *   com 2 só conta a partir da segunda seguida (era a regra antiga: 5 €).
  * - Um treino feito, ou uma desculpa aprovada, põe o contador a zero. O contador não passa de um mês para o outro.
  * - Teto de 15 € por pessoa por mês.
  * - Quem tem desculpas por decidir espera. No dia 5 às 23h59 as desculpas pendentes do mês anterior são aceites.

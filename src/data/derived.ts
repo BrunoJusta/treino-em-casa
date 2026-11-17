@@ -77,7 +77,7 @@ export function buildFeed(snap: Snapshot): FeedItem[] {
     const total = list.reduce((a, j) => a + j.amount_cents, 0)
     const mk = k.split(':')[1]
     const p = list[0].profile_id ? byId.get(list[0].profile_id) ?? null : null
-    items.push({ id: `j-${k}`, at: list[0].created_at, kind: 'penalty', profile: p, text: `meteu ${total / 100} € no jarro`, sub: `Fecho de ${monthName(mk)}: ${list.length} ${list.length === 1 ? 'multa' : 'multas'} por falhas seguidas` })
+    items.push({ id: `j-${k}`, at: list[0].created_at, kind: 'penalty', profile: p, text: `meteu ${total / 100} € no jarro`, sub: `Fecho de ${monthName(mk)}: ${list.length} ${list.length === 1 ? 'multa' : 'multas'} por ${list.some((j) => j.related_days.length > 1) ? 'falhas seguidas' : 'dias falhados'}` })
   }
   for (const e of snap.excuses) {
     if (e.status === 'pending') continue
