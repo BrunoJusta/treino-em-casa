@@ -42,7 +42,9 @@ Registo das decisões fechadas com o Bruno antes de construir. Quando uma regra 
 - **2,50 € por cada dia falhado**, sem precisar de ser seguido (decidido a 17 de novembro de 2026; vale a partir do fecho de novembro). Antes era 5 € por cada falha a partir da segunda seguida.
 - Um treino feito ou uma desculpa aprovada evita a falha desse dia.
 - Durante a semana, os dias falhados ficam "Por recuperar", com aviso de risco. Depois do domingo passam a falha certa.
-- No **dia 1 às 00h15** (Lisboa) fecha-se o mês anterior e lançam-se as multas. O contador não passa de um mês para o outro.
+- A multa é lançada no **fecho da semana**: na segunda-feira (manutenção de hora a hora), cada dia marcado da semana anterior sem treino nem desculpa passa a falha e a multa entra logo no jarro como "por pagar". Decidido a 17 de novembro de 2026.
+- No **dia 1 às 00h15** (Lisboa) fecha-se o mês anterior: trata os dias que ainda faltam (a última semana do mês) sem repetir multas.
+- Uma desculpa aprovada depois de a multa ser lançada anula-a, se ainda estiver por pagar. Se já foi paga, o admin corrige no Jarro.
 - Teto de **15 € por pessoa por mês** (6 falhas).
 - Desculpas (doente, lesão, viagem, outro) são aprovadas pelo admin. O admin aprova as suas, com registo na auditoria e no feed.
 - Desculpa pendente: o dia não conta como falha. O fecho do mês dessa pessoa espera pela decisão. Se no **dia 5 às 23h59** ainda não houver decisão, é aceite automaticamente.

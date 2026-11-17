@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { cmp, monthKey, monthName } from '../lib/dates'
+import { addDays, cmp, dayOfMonth, monthKey, monthName, weekStart } from '../lib/dates'
 import { riskPreview, jarTotals } from '../lib/rules/jar'
 import { familyGoalProgress, levelFor, streakFor, xpFor, countedSessions } from '../lib/rules/game'
 import { useApp } from './store'
@@ -62,12 +62,12 @@ export function buildFeed(snap: Snapshot): FeedItem[] {
       sub: [fmtKm(w.distance_m), fmtDuration(w.duration_s)].filter(Boolean).join(', '),
     })
   }
-  // multas agrupadas por pessoa e fecho de mês, para o feed não ficar cheio de moedas
+  // multas agrupadas por pessoa e semana (do último dia falhado), para o feed não ficar cheio de moedas
   const groups = new Map<string, JarEntry[]>()
   for (const j of snap.jar) {
     if (j.status === 'void') continue
     if (j.kind === 'penalty') {
-      const k = `${j.profile_id}:${j.month_key ?? j.created_at.slice(0, 7)}`
+      const k = `${j.profile_id}:${weekStart(j.related_days.at(-1) ?? j.created_at.slice(0, 10))}`
       if (!groups.has(k)) groups.set(k, [])
       groups.get(k)!.push(j)
     }
@@ -75,9 +75,10 @@ export function buildFeed(snap: Snapshot): FeedItem[] {
   }
   for (const [k, list] of groups) {
     const total = list.reduce((a, j) => a + j.amount_cents, 0)
-    const mk = k.split(':')[1]
+    const ws = k.split(':')[1]
+    const we = addDays(ws, 6)
     const p = list[0].profile_id ? byId.get(list[0].profile_id) ?? null : null
-    items.push({ id: `j-${k}`, at: list[0].created_at, kind: 'penalty', profile: p, text: `meteu ${total / 100} € no jarro`, sub: `Fecho de ${monthName(mk)}: ${list.length} ${list.length === 1 ? 'multa' : 'multas'} por ${list.some((j) => j.related_days.length > 1) ? 'falhas seguidas' : 'dias falhados'}` })
+    items.push({ id: `j-${k}`, at: list[0].created_at, kind: 'penalty', profile: p, text: `meteu ${total / 100} € no jarro`, sub: `Semana de ${dayOfMonth(ws)}${monthKey(ws) !== monthKey(we) ? ` de ${monthName(monthKey(ws))}` : ''} a ${dayOfMonth(we)} de ${monthName(monthKey(we))}: ${list.length} ${list.length === 1 ? 'multa' : 'multas'} por ${list.some((j) => j.related_days.length > 1) ? 'falhas seguidas' : 'dias falhados'}` })
   }
   for (const e of snap.excuses) {
     if (e.status === 'pending') continue

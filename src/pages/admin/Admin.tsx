@@ -73,7 +73,7 @@ function Resumo() {
       </div>
       <div className="card soft stack-sm">
         <h3>Como funciona a manutenção</h3>
-        <p className="small" style={{ color: 'var(--ink-2)' }}>De hora a hora o servidor confirma: aceita as desculpas pendentes do mês anterior a partir do dia {snap.settings.excuse_auto_day + 1}, fecha os meses anteriores (falhas e multas), e a partir do dia {snap.settings.plan_window_end_day + 1} completa as semanas de quem não planeou. Correr várias vezes não duplica nada.</p>
+        <p className="small" style={{ color: 'var(--ink-2)' }}>De hora a hora o servidor confirma: aceita as desculpas pendentes do mês anterior a partir do dia {snap.settings.excuse_auto_day + 1}, {snap.settings.consecutive_misses <= 1 ? 'fecha as semanas que já acabaram (falhas e multas, à segunda-feira), fecha os meses anteriores,' : 'fecha os meses anteriores (falhas e multas),'} e a partir do dia {snap.settings.plan_window_end_day + 1} completa as semanas de quem não planeou. Correr várias vezes não duplica nada.</p>
       </div>
     </section>
   )
