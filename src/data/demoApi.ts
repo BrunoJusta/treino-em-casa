@@ -1,7 +1,6 @@
 import { get as idbGet, set as idbSet, del as idbDel } from 'idb-keyval'
-import { todayLisbon, monthKey, addDays, cmp } from '../lib/dates'
-import { runMaintenanceOn } from '../lib/rules/maintenance'
-import { voidDayPenalty } from '../lib/rules/jar'
+import { todayLisbon, monthKey, addDays, cmp, weekStart } from '../lib/dates'
+import { recheckWeek, runMaintenanceOn } from '../lib/rules/maintenance'
 import { demoPhoto } from '../lib/demoPhoto'
 import type { DataApi } from './api'
 import { buildDemoSnapshot } from './seed'
@@ -199,7 +198,7 @@ export const demoApi: DataApi = {
       e.decided_at = now()
       const pd = s.plannedDays.find((d) => d.id === e.planned_day_id)
       if (pd && approve && pd.status !== 'done') pd.status = 'excused'
-      if (approve) voidDayPenalty(s.jar, e.profile_id, e.date)
+      recheckWeek(s, e.profile_id, e.date, uid, now())
     }, { action: approve ? 'excuse.approve' : 'excuse.reject', entity: 'excuse', entity_id: id, detail: approve ? 'Desculpa aprovada' : 'Desculpa rejeitada' })
   },
   async changeExcuseDecision(id, approve) {
@@ -219,8 +218,7 @@ export const demoApi: DataApi = {
       x.auto = false
       const pd = s.plannedDays.find((d) => d.id === x.planned_day_id)
       if (pd && pd.status !== 'done') pd.status = approve ? 'excused' : closed ? 'missed' : 'planned'
-      if (approve) voidDayPenalty(s.jar, x.profile_id, x.date)
-      else if (!closed) s.jar = s.jar.filter((j) => !(j.kind === 'penalty' && j.profile_id === x.profile_id && j.status === 'void' && j.related_days.join() === x.date && j.reason.endsWith('(anulada: desculpa aprovada)')))
+      recheckWeek(s, x.profile_id, x.date, uid, now())
     }, { action: approve ? 'excuse.change_approve' : 'excuse.change_reject', entity: 'excuse', entity_id: id, detail: `Decisão mudada para ${approve ? 'aprovada' : 'recusada'} (${e.date}${closed ? ', mês já fechado' : ''})` })
   },
   async savePlan(plan) {
@@ -394,6 +392,7 @@ export const demoApi: DataApi = {
       snap.audit = []
       // depois de repor, o mês atual não volta a ser preenchido automaticamente
       const mk = monthKey(todayLisbon())
+      snap.settings.weekly_from = weekStart(todayLisbon()) // não voltar a cobrar semanas antigas
       for (const p of snap.profiles) snap.audit.push({ id: uid(), actor_id: currentUser, action: 'month.autofill', entity: 'planned_days', entity_id: `autofill:${p.id}:${mk}`, detail: 'Sem preenchimento automático depois de repor', created_at: now() })
     }, { action: 'reset.activity', entity: 'all', detail: includeBody ? 'Dados repostos (incluindo peso e IMC)' : 'Dados repostos' })
     if (includeBody) {

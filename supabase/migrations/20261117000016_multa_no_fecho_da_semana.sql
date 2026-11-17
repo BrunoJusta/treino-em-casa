@@ -226,6 +226,3 @@ begin
   perform set_config('app.system', '', true);
   return trim(log);
 end $$;
-
--- corre já, para lançar as multas das semanas que já acabaram
-select public.run_maintenance();

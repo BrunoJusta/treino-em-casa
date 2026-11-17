@@ -154,6 +154,7 @@ export interface JarSettings {
   monthly_cap_cents: number
   plan_window_end_day: number // 5
   excuse_auto_day: number // 5
+  weekly_from?: string // 'YYYY-MM-DD': a regra semanal só fecha semanas a partir deste dia (o repor dados muda-o para a semana atual)
   goal_name: string
   goal_cents: number
   family_goal_sessions: number

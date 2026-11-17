@@ -67,7 +67,7 @@ export function Jarro() {
       </section>
 
       {myRisk > 0 ? (
-        <div className="card danger"><p className="strong">{mine.risk.recoverable_cents > 0 ? `Atenção: tens ${euros(myRisk)} em risco este mês` : `Atenção: vais pôr ${euros(myRisk)} no jarro este mês`}</p><p className="small" style={{ color: 'var(--ink-2)' }}>{riskText(mine.risk, s)}</p></div>
+        <div className="card danger"><p className="strong">{mine.risk.recoverable_cents > 0 ? `Atenção: tens ${euros(myRisk)} em risco ${mine.risk.week ? 'esta semana' : 'este mês'}` : `Atenção: vais pôr ${euros(myRisk)} no jarro este mês`}</p><p className="small" style={{ color: 'var(--ink-2)' }}>{riskText(mine.risk, s)}</p></div>
       ) : (
         <div className="card accent row"><CheckCircle size={26} weight="fill" color="var(--accent-text)" /><p className="small grow">Este mês estás livre de multas. Continua assim.</p></div>
       )}
@@ -98,7 +98,7 @@ export function Jarro() {
         <ul className="small" style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)', display: 'flex', flexDirection: 'column', gap: 6 }}>
           <li>Cada pessoa marca pelo menos {me.min_days_week} dias por semana (1 nas semanas cortadas do mês, nenhum nas semanas com um só dia). Planeia-se de dia 1 a {s.plan_window_end_day}.</li>
           <li>Os dias mudam-se quando quiseres, dentro do mesmo mês. Um dia que passou sem treino fica "por recuperar" até domingo e só se muda para um dia dessa semana. Quando a semana acaba, conta como falha.</li>
-          <li>{s.consecutive_misses <= 1 ? `Cada dia falhado custa ${euros(s.penalty_cents)}. A multa é lançada à segunda-feira, no fecho da semana anterior.` : `No dia 1 fecha-se o mês anterior. Cada falha a partir da ${s.consecutive_misses}.ª seguida custa ${euros(s.penalty_cents)}.`}</li>
+          <li>{s.consecutive_misses <= 1 ? `Conta o que fazes, não o que marcas: cada semana pede ${me.min_days_week} treinos feitos (menos nas semanas cortadas do mês). Cada treino em falta custa ${euros(s.penalty_cents)}, lançado à segunda-feira no fecho da semana. Uma desculpa aprovada conta como treino.` : `No dia 1 fecha-se o mês anterior. Cada falha a partir da ${s.consecutive_misses}.ª seguida custa ${euros(s.penalty_cents)}.`}</li>
           {s.consecutive_misses > 1 && <li>Um treino feito, ou uma desculpa aprovada, põe o contador a zero. O contador não passa de um mês para o outro.</li>}
           <li>Máximo de {euros(s.monthly_cap_cents)} por pessoa por mês.</li>
           <li>Desculpas (doente, lesão, viagem) são aprovadas pelo admin. Se ninguém decidir até dia {s.excuse_auto_day}, ficam aceites.</li>

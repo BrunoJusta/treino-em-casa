@@ -73,7 +73,7 @@ function Resumo() {
       </div>
       <div className="card soft stack-sm">
         <h3>Como funciona a manutenção</h3>
-        <p className="small" style={{ color: 'var(--ink-2)' }}>De hora a hora o servidor confirma: aceita as desculpas pendentes do mês anterior a partir do dia {snap.settings.excuse_auto_day + 1}, {snap.settings.consecutive_misses <= 1 ? 'fecha as semanas que já acabaram (falhas e multas, à segunda-feira), fecha os meses anteriores,' : 'fecha os meses anteriores (falhas e multas),'} e a partir do dia {snap.settings.plan_window_end_day + 1} completa as semanas de quem não planeou. Correr várias vezes não duplica nada.</p>
+        <p className="small" style={{ color: 'var(--ink-2)' }}>De hora a hora o servidor confirma: aceita as desculpas pendentes do mês anterior a partir do dia {snap.settings.excuse_auto_day + 1}, {snap.settings.consecutive_misses <= 1 ? 'fecha as semanas que já acabaram (multa por cada treino em falta, à segunda-feira), fecha os meses anteriores,' : 'fecha os meses anteriores (falhas e multas),'} e a partir do dia {snap.settings.plan_window_end_day + 1} completa as semanas de quem não planeou. Correr várias vezes não duplica nada.</p>
       </div>
     </section>
   )
@@ -277,7 +277,8 @@ function Regras() {
         <h3>Jarro</h3>
         <div className="grid-2">
           <label className="field"><span>Multa (€)</span><input className="input num" inputMode="decimal" defaultValue={s.penalty_cents / 100} onChange={(e) => num('penalty_cents', e.target.value, true)} /></label>
-          <label className="field"><span>A partir da falha n.º</span><input className="input num" inputMode="numeric" defaultValue={s.consecutive_misses} onChange={(e) => num('consecutive_misses', e.target.value)} /><span className="help">1 = cada falha conta; 2 = só a partir da segunda seguida</span></label>
+          <label className="field"><span>A partir da falha n.º</span><input className="input num" inputMode="numeric" defaultValue={s.consecutive_misses} onChange={(e) => num('consecutive_misses', e.target.value)} /><span className="help">1 = regra semanal: cada treino em falta na semana paga. 2 ou mais = regra antiga das falhas seguidas</span></label>
+          <label className="field"><span>Regra semanal desde</span><input className="input" type="date" defaultValue={s.weekly_from ?? '2026-11-02'} onChange={(e) => setForm((f) => ({ ...f, weekly_from: e.target.value }))} /><span className="help">Semanas antes disto não pagam</span></label>
           <label className="field"><span>Teto por mês (€)</span><input className="input num" inputMode="decimal" defaultValue={s.monthly_cap_cents / 100} onChange={(e) => num('monthly_cap_cents', e.target.value, true)} /></label>
           <label className="field"><span>Planear até ao dia</span><input className="input num" inputMode="numeric" defaultValue={s.plan_window_end_day} onChange={(e) => num('plan_window_end_day', e.target.value)} /></label>
           <label className="field"><span>Desculpas aceites no dia</span><input className="input num" inputMode="numeric" defaultValue={s.excuse_auto_day} onChange={(e) => num('excuse_auto_day', e.target.value)} /><span className="help">do mês seguinte, às 23h59</span></label>
