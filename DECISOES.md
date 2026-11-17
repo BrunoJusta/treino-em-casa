@@ -39,18 +39,19 @@ Registo das decisões fechadas com o Bruno antes de construir. Quando uma regra 
 
 ## Jarro
 
-- **2,50 € por cada dia falhado**, sem precisar de ser seguido (decidido a 17 de novembro de 2026; vale a partir do fecho de novembro). Antes era 5 € por cada falha a partir da segunda seguida.
-- Um treino feito ou uma desculpa aprovada evita a falha desse dia.
-- Durante a semana, os dias falhados ficam "Por recuperar", com aviso de risco. Depois do domingo passam a falha certa.
-- A multa é lançada no **fecho da semana**: na segunda-feira (manutenção de hora a hora), cada dia marcado da semana anterior sem treino nem desculpa passa a falha e a multa entra logo no jarro como "por pagar". Decidido a 17 de novembro de 2026.
-- No **dia 1 às 00h15** (Lisboa) fecha-se o mês anterior: trata os dias que ainda faltam (a última semana do mês) sem repetir multas.
-- Uma desculpa aprovada depois de a multa ser lançada anula-a, se ainda estiver por pagar. Se já foi paga, o admin corrige no Jarro.
-- Teto de **15 € por pessoa por mês** (6 falhas).
-- Desculpas (doente, lesão, viagem, outro) são aprovadas pelo admin. O admin aprova as suas, com registo na auditoria e no feed.
-- Desculpa pendente: o dia não conta como falha. O fecho do mês dessa pessoa espera pela decisão. Se no **dia 5 às 23h59** ainda não houver decisão, é aceite automaticamente.
+- **Regra semanal (desde 2 de novembro de 2026): conta o que se faz, não o que se marca.** Cada semana (segunda a domingo) pede o mínimo de treinos feitos (2; nas semanas cortadas do mês, o mínimo proporcional). Cada treino em falta custa **2,50 €**: semana sem treinos = 5 €, com 1 treino = 2,50 €, com 2 = nada. Quem se esquece de marcar os dias paga na mesma se não treinar. Uma desculpa aprovada conta como treino.
+- A multa é lançada no **fecho da semana**: na segunda-feira (manutenção de hora a hora) entra no jarro como "por pagar". Se houver uma desculpa por decidir nessa semana, espera pela decisão.
+- Uma desculpa decidida depois do fecho refaz a multa dessa semana, se ainda estiver por pagar (se já foi paga, o admin corrige no Jarro).
+- Marcar dias continua a servir para planear e para os avisos. Um dia falhado fica "Por recuperar" até domingo.
+- Teto de **15 € por pessoa por mês**.
+- No **dia 1 às 00h15** (Lisboa) fecha-se o mês anterior (marca os dias e regista o resumo).
+- Repor os dados muda o início da regra semanal para a semana atual, para não cobrar semanas antigas.
+- Antes de novembro de 2026 a regra era 5 € por cada falha a partir da segunda seguida, no fecho do mês (fica disponível em Regras com "a partir da falha n.º" 2 ou mais).
+- Desculpas (doente, lesão, viagem, outro) são aprovadas pelo admin. O admin aprova as suas, com registo na auditoria e no feed. Se no **dia 5 do mês seguinte às 23h59** ainda não houver decisão, é aceite automaticamente.
 - O dinheiro é gasto em conjunto. A app não mexe em dinheiro real.
-- O fecho é idempotente e tudo fica na auditoria.
-- No backoffice (Jarro) o admin pode corrigir qualquer movimento (valor, motivo, estado) ou apagá-lo com motivo. Em Desculpas pode mudar uma decisão (aprovada ↔ recusada); o dia acompanha. Num mês já fechado as multas não são recalculadas: corrigem-se à mão no Jarro.
+- Os fechos são idempotentes e tudo fica na auditoria.
+- No backoffice (Jarro) o admin pode corrigir qualquer movimento (valor, motivo, estado) ou apagá-lo com motivo. Em Desculpas pode mudar uma decisão (aprovada ↔ recusada); o dia acompanha.
+- 17 de novembro de 2026: Paula Almeida e Pedro Carreira meteram 10 € cada no pote (entrada no jarro).
 
 ## Gamificação
 

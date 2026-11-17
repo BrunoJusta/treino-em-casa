@@ -49,7 +49,7 @@ export function DayActions({ day, onClose }: { day: PlannedDay | null; onClose: 
             {day.moved_from && <span className="chip">Veio do dia {dayOfMonth(day.moved_from)}</span>}
           </div>
           {st === 'recover' && <p className="small" style={{ color: 'var(--ink-2)' }}>Este dia já passou sem treino. Muda-o para hoje ou para um dia livre desta semana (até domingo) e treina nesse dia. Se não o recuperares até domingo, conta como falha.</p>}
-          {st === 'missed' && !monthClosed && <p className="small" style={{ color: 'var(--ink-2)' }}>A semana deste dia já passou sem treino, por isso conta como falha e já não se muda. Se houve um motivo (doença, lesão, viagem), ainda podes pedir desculpa até o mês fechar: se for aprovada, a multa é anulada.</p>}
+          {st === 'missed' && !monthClosed && <p className="small" style={{ color: 'var(--ink-2)' }}>A semana deste dia já passou sem treino, por isso conta como falha e já não se muda. Se houve um motivo (doença, lesão, viagem), ainda podes pedir desculpa até o mês fechar: se for aprovada, conta como treino e a multa da semana é revista.</p>}
           {canChange && (
             <label className="field">
               <span>Treino para este dia</span>

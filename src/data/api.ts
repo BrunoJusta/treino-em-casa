@@ -99,6 +99,7 @@ export const DEFAULT_SETTINGS: JarSettings = {
   monthly_cap_cents: 1500,
   plan_window_end_day: 5,
   excuse_auto_day: 5,
+  weekly_from: '2026-11-02',
   goal_name: 'Jantar de Natal',
   goal_cents: 10000,
   family_goal_sessions: 40,

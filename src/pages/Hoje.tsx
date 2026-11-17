@@ -148,7 +148,7 @@ export function Hoje() {
         <div className="card danger row">
           <JarMascot mood="wow" level={0.3} size={46} bounce={false} />
           <div className="grow">
-            <p className="strong">{p.risk.certain_cents ? `Se o mês fechasse hoje, ias pôr ${euros(risk)} no jarro` : `Se não recuperares até domingo, vais pôr ${euros(risk)} no jarro`}</p>
+            <p className="strong">{p.risk.certain_cents ? `Se o mês fechasse hoje, ias pôr ${euros(risk)} no jarro` : p.risk.week ? `${p.risk.week.missing === 1 ? 'Falta 1 treino' : `Faltam ${p.risk.week.missing} treinos`} esta semana: ${euros(risk)} em risco` : `Se não recuperares até domingo, vais pôr ${euros(risk)} no jarro`}</p>
             <p className="small" style={{ color: 'var(--ink-2)' }}>{riskText(p.risk, snap.settings)}</p>
           </div>
         </div>
