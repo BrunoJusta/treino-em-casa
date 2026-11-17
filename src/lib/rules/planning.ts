@@ -38,8 +38,8 @@ export type DayState =
   | 'done' // treino feito
   | 'excused' // desculpa aprovada
   | 'pending' // desculpa por decidir
-  | 'missed' // falha definitiva (mês fechado)
-  | 'recover' // dia que já passou sem treino, ainda dá para recuperar este mês
+  | 'missed' // falha definitiva: a semana do dia já passou (ou o mês fechou)
+  | 'recover' // dia desta semana que já passou sem treino, ainda dá para recuperar até domingo
   | 'today' // marcado para hoje
   | 'planned' // marcado para o futuro
 
@@ -55,9 +55,14 @@ export function dayState(
   if (pd.status === 'excused' || ex?.status === 'approved') return 'excused'
   if (ex?.status === 'pending') return 'pending'
   if (pd.status === 'missed' || closedMonths.has(`${pd.profile_id}:${monthKey(pd.date)}`)) return 'missed'
-  if (cmp(pd.date, today) < 0) return 'recover'
+  if (cmp(pd.date, today) < 0) return weekPassed(pd.date, today) ? 'missed' : 'recover'
   if (pd.date === today) return 'today'
   return 'planned'
+}
+
+/** A semana (segunda a domingo) deste dia já acabou? A partir daí um dia falhado já não se recupera. */
+export function weekPassed(date: string, today: string): boolean {
+  return cmp(weekStart(date), weekStart(today)) < 0
 }
 
 export interface Ctx {
@@ -87,14 +92,15 @@ export function unmarkWarning(pd: PlannedDay, ctx: Ctx): string | null {
   return null
 }
 
-/** Pode mudar-se um dia marcado para outra data? Dentro do mesmo mês, para hoje ou para a frente. */
+/** Pode mudar-se um dia marcado para outra data? Dentro do mesmo mês, para hoje ou para a frente. Um dia falhado só na mesma semana. */
 export function canMove(pd: PlannedDay, to: string, ctx: Ctx): { ok: boolean; reason?: string } {
   const st = dayState(pd, ctx.today, ctx.sessions, ctx.excuses, ctx.closedMonths)
   if (st === 'done') return { ok: false, reason: 'Este dia já tem treino feito.' }
-  if (st === 'missed') return { ok: false, reason: 'Este mês já fechou.' }
+  if (st === 'missed') return { ok: false, reason: ctx.closedMonths.has(`${pd.profile_id}:${monthKey(pd.date)}`) ? 'Este mês já fechou.' : 'A semana deste dia já passou: conta como falha.' }
   if (st === 'pending' || st === 'excused') return { ok: false, reason: 'Este dia tem uma desculpa.' }
   if (monthKey(to) !== monthKey(pd.date)) return { ok: false, reason: 'Os dias não passam para outro mês.' }
   if (cmp(to, ctx.today) < 0) return { ok: false, reason: 'Só podes mudar para hoje ou para a frente.' }
+  if (st === 'recover' && weekStart(to) !== weekStart(pd.date)) return { ok: false, reason: 'Um dia falhado só se recupera na mesma semana.' }
   if (ctx.days.some((d) => d.date === to)) return { ok: false, reason: 'Esse dia já está marcado.' }
   return { ok: true }
 }

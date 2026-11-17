@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { computeMonthClose, shouldAutoApprove, monthsToClose } from './jar'
-import { autofillDates, canMove, canUnmark, unmarkWarning, checkMonthWeeks, weekRequirement } from './planning'
+import { autofillDates, canMove, dayState, canUnmark, unmarkWarning, checkMonthWeeks, weekRequirement } from './planning'
 import { addDays, todayLisbon, weekday } from '../dates'
 import type { Excuse, JarSettings, PlannedDay, Session } from '../../data/types'
 
@@ -102,12 +102,27 @@ describe('planeamento', () => {
     expect(add.filter((d) => d >= '2026-11-09').every((d) => [0, 2].includes(weekday(d)))).toBe(true)
   })
 
-  it('pode mudar-se um dia falhado para a frente, dentro do mesmo mês', () => {
-    const a = pd('2026-11-02')
+  it('um dia falhado só se recupera na mesma semana', () => {
+    const a = pd('2026-11-02') // segunda
     const ctx = { today: '2026-11-05', days: [a], sessions: [], excuses: [], closedMonths: new Set<string>(), minPerWeek: 2 }
-    expect(canMove(a, '2026-11-06', ctx).ok).toBe(true)
+    expect(canMove(a, '2026-11-06', ctx).ok).toBe(true) // sexta da mesma semana
+    expect(canMove(a, '2026-11-08', ctx).ok).toBe(true) // domingo
+    expect(canMove(a, '2026-11-09', ctx).ok).toBe(false) // semana seguinte
     expect(canMove(a, '2026-11-04', ctx).ok).toBe(false)
     expect(canMove(a, '2026-12-01', ctx).ok).toBe(false)
+  })
+
+  it('depois de a semana acabar, o dia falhado conta como falha e já não se muda', () => {
+    const a = pd('2026-11-12')
+    const ctx = { today: '2026-11-17', days: [a], sessions: [], excuses: [], closedMonths: new Set<string>(), minPerWeek: 2 }
+    expect(dayState(a, ctx.today, [], [], ctx.closedMonths)).toBe('missed')
+    expect(canMove(a, '2026-11-18', ctx).ok).toBe(false)
+  })
+
+  it('um dia futuro continua a mudar-se para qualquer dia do mês', () => {
+    const a = pd('2026-11-19')
+    const ctx = { today: '2026-11-17', days: [a], sessions: [], excuses: [], closedMonths: new Set<string>(), minPerWeek: 2 }
+    expect(canMove(a, '2026-11-30', ctx).ok).toBe(true)
   })
 
   it('deixa tirar um dia mesmo que a semana fique abaixo do mínimo, mas avisa', () => {

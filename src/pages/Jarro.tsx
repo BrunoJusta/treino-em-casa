@@ -6,7 +6,7 @@ import { api } from '../lib/config'
 import { JarMascot, FallingCoin } from '../components/pixel/JarMascot'
 import { Avatar } from '../components/Avatar'
 import { Bar, ConfirmSheet, Empty, Sheet, TopBar } from '../components/ui'
-import { euros, owedBy } from '../lib/rules/jar'
+import { euros, owedBy, riskText } from '../lib/rules/jar'
 import { shortDate, timeAgo, monthName } from '../lib/dates'
 import { sfx } from '../lib/fx'
 
@@ -67,7 +67,7 @@ export function Jarro() {
       </section>
 
       {myRisk > 0 ? (
-        <div className="card danger"><p className="strong">Atenção: tens {euros(myRisk)} em risco este mês</p><p className="small" style={{ color: 'var(--ink-2)' }}>Recupera um dos dias falhados antes do fim do mês e o risco desaparece.</p></div>
+        <div className="card danger"><p className="strong">{mine.risk.recoverable_cents > 0 ? `Atenção: tens ${euros(myRisk)} em risco este mês` : `Atenção: vais pôr ${euros(myRisk)} no jarro este mês`}</p><p className="small" style={{ color: 'var(--ink-2)' }}>{riskText(mine.risk)}</p></div>
       ) : (
         <div className="card accent row"><CheckCircle size={26} weight="fill" color="var(--accent-text)" /><p className="small grow">Este mês estás livre de multas. Continua assim.</p></div>
       )}
@@ -97,7 +97,7 @@ export function Jarro() {
       <Sheet open={rules} onClose={() => setRules(false)} title="Regras do jarro">
         <ul className="small" style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)', display: 'flex', flexDirection: 'column', gap: 6 }}>
           <li>Cada pessoa marca pelo menos {me.min_days_week} dias por semana (1 nas semanas cortadas do mês, nenhum nas semanas com um só dia). Planeia-se de dia 1 a {s.plan_window_end_day}.</li>
-          <li>Os dias mudam-se quando quiseres, dentro do mesmo mês. Um dia que passou sem treino fica "por recuperar".</li>
+          <li>Os dias mudam-se quando quiseres, dentro do mesmo mês. Um dia que passou sem treino fica "por recuperar" até domingo e só se muda para um dia dessa semana. Quando a semana acaba, conta como falha.</li>
           <li>No dia 1 fecha-se o mês anterior. Cada falha a partir da segunda seguida custa {euros(s.penalty_cents)}.</li>
           <li>Um treino feito, ou uma desculpa aprovada, põe o contador a zero. O contador não passa de um mês para o outro.</li>
           <li>Máximo de {euros(s.monthly_cap_cents)} por pessoa por mês.</li>

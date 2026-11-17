@@ -9,9 +9,9 @@ import { JarMascot } from '../components/pixel/JarMascot'
 import { PixelIcon } from '../components/pixel/Pixel'
 import { Bar, Photo, ProfileLink } from '../components/ui'
 import { InstallCard } from '../components/InstallCard'
-import { dayOfMonth, longDate, monthKey, monthName, hourLisbon, daysInMonth } from '../lib/dates'
+import { dayOfMonth, longDate, monthKey, monthName, hourLisbon } from '../lib/dates'
 import { checkMonthWeeks } from '../lib/rules/planning'
-import { euros } from '../lib/rules/jar'
+import { euros, riskText } from '../lib/rules/jar'
 import { api, isDemo } from '../lib/config'
 import { names } from '../lib/format'
 import { addDays } from '../lib/dates'
@@ -149,7 +149,7 @@ export function Hoje() {
           <JarMascot mood="wow" level={0.3} size={46} bounce={false} />
           <div className="grow">
             <p className="strong">Se o mês fechasse hoje, ias pôr {euros(risk)} no jarro</p>
-            <p className="small" style={{ color: 'var(--ink-2)' }}>Muda um dos dias falhados para um dia livre até {daysInMonth(mk)} de {monthName(mk)} e treina.</p>
+            <p className="small" style={{ color: 'var(--ink-2)' }}>{riskText(p.risk)}</p>
           </div>
         </div>
       )}
