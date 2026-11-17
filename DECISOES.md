@@ -43,7 +43,7 @@ Registo das decisões fechadas com o Bruno antes de construir. Quando uma regra 
 - A multa é lançada no **fecho da semana**: na segunda-feira (manutenção de hora a hora) entra no jarro como "por pagar". Se houver uma desculpa por decidir nessa semana, espera pela decisão.
 - Uma desculpa decidida depois do fecho refaz a multa dessa semana, se ainda estiver por pagar (se já foi paga, o admin corrige no Jarro).
 - Marcar dias continua a servir para planear e para os avisos. Um dia falhado fica "Por recuperar" até domingo.
-- Teto de **15 € por pessoa por mês**.
+- Teto de **20 € por pessoa por mês** (desde 17 de novembro de 2026; antes 15 €).
 - No **dia 1 às 00h15** (Lisboa) fecha-se o mês anterior (marca os dias e regista o resumo).
 - Repor os dados muda o início da regra semanal para a semana atual, para não cobrar semanas antigas.
 - Antes de novembro de 2026 a regra era 5 € por cada falha a partir da segunda seguida, no fecho do mês (fica disponível em Regras com "a partir da falha n.º" 2 ou mais).

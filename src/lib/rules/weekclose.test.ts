@@ -33,9 +33,12 @@ describe('regra semanal: 2,50 € por treino em falta', () => {
   })
 
   it('respeita o teto do mês e não cobra antes da data de início', () => {
-    const s = runMaintenanceOn(snap(), '2026-12-01', uid, 'x')
+    expect(DEFAULT_SETTINGS.monthly_cap_cents).toBe(2000)
+    const s0 = snap()
+    s0.settings.monthly_cap_cents = 1200
+    const s = runMaintenanceOn(s0, '2026-12-01', uid, 'x')
     expect(s.jar.filter((j) => j.month_key === '2026-10')).toHaveLength(0)
-    expect(s.jar.filter((j) => j.month_key === '2026-11').reduce((a, j) => a + j.amount_cents, 0)).toBe(1500)
+    expect(s.jar.filter((j) => j.month_key === '2026-11').reduce((a, j) => a + j.amount_cents, 0)).toBe(1200)
   })
 
   it('uma desculpa aprovada conta como treino; pendente faz esperar', () => {

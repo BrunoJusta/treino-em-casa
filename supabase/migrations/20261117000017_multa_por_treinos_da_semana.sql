@@ -2,9 +2,15 @@
 -- conta o que se fez, não o que se marcou. Cada semana (segunda a domingo, cortada no mês) pede o mínimo
 -- de treinos da pessoa (2; menos nas semanas cortadas). Cada treino em falta custa 2,50 €:
 -- 0 treinos = 5 €, 1 treino = 2,50 €, 2 treinos = nada. Uma desculpa aprovada conta como treino.
--- A multa é lançada na segunda-feira seguinte (manutenção de hora a hora), com o teto do mês.
+-- A multa é lançada na segunda-feira seguinte (manutenção de hora a hora), com o teto do mês (20 €).
 
 alter table public.settings add column if not exists weekly_from date not null default '2026-11-02';
+
+-- Teto mensal passa a 20 € por pessoa.
+alter table public.settings alter column monthly_cap_cents set default 2000;
+update public.settings set monthly_cap_cents = 2000 where id = 1;
+insert into public.audit_log (actor_id, action, entity, entity_id, detail)
+values (null, 'settings.update', 'settings', null, 'monthly_cap_cents=2000 (teto de 20 € por mês)');
 
 -- Tira as multas "por dia falhado" da migração anterior (regra que durou umas horas).
 delete from public.jar_entries

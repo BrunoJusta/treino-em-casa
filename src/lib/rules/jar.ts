@@ -10,7 +10,7 @@ import type { Excuse, JarEntry, JarSettings, MonthClosure, PlannedDay, Profile, 
  * - Multa por cada falha (2,50 € desde novembro de 2026). Nas regras, "a partir da falha n.º" = 1 faz cada falha contar sozinha;
  *   com 2 só conta a partir da segunda seguida (era a regra antiga: 5 €).
  * - Um treino feito, ou uma desculpa aprovada, põe o contador a zero. O contador não passa de um mês para o outro.
- * - Teto de 15 € por pessoa por mês.
+ * - Teto por pessoa por mês (20 € desde 17 de novembro de 2026).
  * - Quem tem desculpas por decidir espera. No dia 5 às 23h59 as desculpas pendentes do mês anterior são aceites.
  * - Correr o fecho duas vezes não duplica nada (há um registo de fecho por pessoa e mês).
  */
