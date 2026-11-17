@@ -61,6 +61,7 @@ export interface DataApi {
   // desculpas
   createExcuse(plannedDayId: string, type: ExcuseType, note: string): Promise<void>
   decideExcuse(id: string, approve: boolean): Promise<void>
+  changeExcuseDecision(id: string, approve: boolean): Promise<void> // backoffice: aprovada ↔ recusada
   // planos
   savePlan(plan: WorkoutPlan): Promise<void>
   deletePlan(id: string): Promise<void>
@@ -72,6 +73,8 @@ export interface DataApi {
   updateSettings(patch: Partial<JarSettings>): Promise<void>
   setJarEntryStatus(id: string, status: JarEntry['status'], reason?: string): Promise<void>
   addJarEntry(e: Pick<JarEntry, 'kind' | 'amount_cents' | 'reason' | 'profile_id'>): Promise<void>
+  updateJarEntry(id: string, patch: Pick<JarEntry, 'amount_cents' | 'reason' | 'status'>): Promise<void> // backoffice: corrigir
+  deleteJarEntry(id: string, reason: string): Promise<void> // backoffice: apagar um movimento errado
   createMember(m: NewMember): Promise<void>
   updateProfile(id: string, patch: Partial<Profile>): Promise<void>
   resetCode(id: string, code: string): Promise<void>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
-import { Check, DownloadSimple, X } from '@phosphor-icons/react'
+import { Check, DownloadSimple, PencilSimple, X } from '@phosphor-icons/react'
 import { useApp } from '../../data/store'
 import { api } from '../../lib/config'
 import { Avatar } from '../../components/Avatar'
@@ -11,7 +11,7 @@ import { longDate, monthLabel, timeAgo, todayLisbon } from '../../lib/dates'
 import { AdminPeople } from './AdminPeople'
 import { AdminEquipment } from './AdminEquipment'
 import { AdminExercises } from './AdminExercises'
-import type { JarEntry } from '../../data/types'
+import type { Excuse, JarEntry } from '../../data/types'
 
 const TABS = [
   ['', 'Resumo'],
@@ -81,6 +81,7 @@ function Resumo() {
 
 function Desculpas() {
   const { snap, me, run } = useApp()
+  const [changing, setChanging] = useState<Excuse | null>(null)
   const byId = new Map(snap.profiles.map((p) => [p.id, p]))
   const pending = snap.excuses.filter((e) => e.status === 'pending').sort((a, b) => (a.date < b.date ? -1 : 1))
   const decided = snap.excuses.filter((e) => e.status !== 'pending').sort((a, b) => ((a.decided_at ?? '') < (b.decided_at ?? '') ? 1 : -1)).slice(0, 30)
@@ -113,11 +114,32 @@ function Desculpas() {
               <div key={e.id} className="list-item">
                 <div className="grow"><p className="small strong">{byId.get(e.profile_id)?.display_name}: {EXCUSE_LABEL[e.type]}, {longDate(e.date)}</p><p className="tiny muted">{e.auto ? 'Aceite automaticamente no prazo' : `Por ${byId.get(e.decided_by ?? '')?.display_name ?? 'admin'}`}</p></div>
                 <span className={`chip ${e.status === 'approved' ? 'ok' : 'danger'}`}>{e.status === 'approved' ? 'Aprovada' : 'Recusada'}</span>
+                <button className="btn sm ghost" aria-label="Mudar a decisão" onClick={() => setChanging(e)}><PencilSimple size={18} weight="bold" /></button>
               </div>
             ))}
           </div>
         </>
       )}
+      <Sheet open={!!changing} onClose={() => setChanging(null)} title="Mudar a decisão">
+        {changing && (() => {
+          const approved = changing.status === 'approved'
+          const closed = snap.closures.some((c) => c.profile_id === changing.profile_id && c.month_key === changing.date.slice(0, 7))
+          return (
+            <div className="stack">
+              <p><span className="strong">{byId.get(changing.profile_id)?.display_name}: {EXCUSE_LABEL[changing.type]}</span><br /><span className="small muted">{longDate(changing.date)}, agora {approved ? 'aprovada' : 'recusada'}{changing.auto ? ' (automaticamente)' : ''}</span></p>
+              {changing.note && <p className="card soft small">{changing.note}</p>}
+              <p className="small" style={{ color: 'var(--ink-2)' }}>{approved
+                ? 'Se a recusares, o dia deixa de estar desculpado e volta a contar como por fazer.'
+                : 'Se a aprovares, o dia fica desculpado e deixa de contar como falha.'}</p>
+              {closed && <p className="small" style={{ color: 'var(--warn)' }}>O mês de {monthLabel(changing.date.slice(0, 7))} já fechou. As multas não são recalculadas: corrige-as à mão em Jarro{approved ? ' (o dia passa a falhado)' : ''}.</p>}
+              <button className={`btn ${approved ? 'danger' : 'primary'} big block`} onClick={() => run(() => api.changeExcuseDecision(changing.id, !approved), approved ? 'Desculpa passou a recusada' : 'Desculpa passou a aprovada').then(() => setChanging(null))}>
+                {approved ? <><X size={20} weight="bold" /> Passar a recusada</> : <><Check size={20} weight="bold" /> Passar a aprovada</>}
+              </button>
+              <button className="btn ghost block" onClick={() => setChanging(null)}>Cancelar</button>
+            </div>
+          )
+        })()}
+      </Sheet>
     </section>
   )
 }
@@ -127,9 +149,9 @@ function JarAdmin() {
   const [kind, setKind] = useState<'spend' | 'adjust'>('spend')
   const [amount, setAmount] = useState('')
   const [reason, setReason] = useState('')
-  const [voiding, setVoiding] = useState<JarEntry | null>(null)
-  const [voidReason, setVoidReason] = useState('')
+  const [editing, setEditing] = useState<JarEntry | null>(null)
   const byId = new Map(snap.profiles.map((p) => [p.id, p]))
+  const others = snap.jar.filter((j) => j.kind !== 'penalty').sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
   const add = async () => {
     const cents = Math.round(Number(amount.replace(',', '.')) * 100)
     if (!Number.isFinite(cents) || cents <= 0) return toast('Escreve um valor em euros, por exemplo 12,50.', 'error')
@@ -157,18 +179,90 @@ function JarAdmin() {
               <p className="small strong">{byId.get(j.profile_id ?? '')?.display_name}: {euros(j.amount_cents)}{j.month_key ? ` (${monthLabel(j.month_key)})` : ''}</p>
               <p className="tiny muted">{j.reason}</p>
             </div>
-            <span className={`chip ${j.status === 'paid' ? 'ok' : j.status === 'void' ? '' : 'warn'}`}>{j.status === 'paid' ? 'Paga' : j.status === 'void' ? 'Anulada' : 'Por pagar'}</span>
+            <span className={`chip ${j.status === 'paid' ? 'ok' : j.status === 'void' ? '' : 'warn'}`}>{STATUS_LABEL[j.status]}</span>
             {j.status === 'unpaid' && <button className="btn sm secondary" onClick={() => run(() => api.setJarEntryStatus(j.id, 'paid'), 'Marcada como paga')}>Paga</button>}
-            {j.status !== 'void' && <button className="btn sm ghost" onClick={() => setVoiding(j)}>Anular</button>}
+            <button className="btn sm ghost" aria-label="Corrigir" onClick={() => setEditing(j)}><PencilSimple size={18} weight="bold" /></button>
           </div>
         ))}
       </div>
-      <Sheet open={!!voiding} onClose={() => setVoiding(null)} title="Anular multa">
-        <p className="muted">Fica registado no histórico com o motivo. Usa só quando houve um erro.</p>
-        <label className="field"><span>Motivo</span><input className="input" value={voidReason} onChange={(e) => setVoidReason(e.target.value)} /></label>
-        <button className="btn danger big block" disabled={!voidReason.trim()} onClick={() => run(() => api.setJarEntryStatus(voiding!.id, 'void', voidReason.trim()), 'Multa anulada').then(() => { setVoiding(null); setVoidReason('') })}>Anular</button>
-      </Sheet>
+      <h2>Outros movimentos</h2>
+      {others.length ? (
+        <div className="list">
+          {others.map((j) => (
+            <div key={j.id} className="list-item">
+              <div className="grow">
+                <p className="small strong">{KIND_LABEL[j.kind]}: {j.kind === 'spend' ? '−' : '+'}{euros(j.amount_cents)}{j.profile_id ? ` (${byId.get(j.profile_id)?.display_name ?? ''})` : ''}</p>
+                <p className="tiny muted">{j.reason}, {longDate(j.created_at.slice(0, 10))}</p>
+              </div>
+              {j.status === 'void' && <span className="chip">Anulado</span>}
+              <button className="btn sm ghost" aria-label="Corrigir" onClick={() => setEditing(j)}><PencilSimple size={18} weight="bold" /></button>
+            </div>
+          ))}
+        </div>
+      ) : <p className="small muted">Ainda sem gastos nem ajustes.</p>}
+      <JarEditSheet entry={editing} onClose={() => setEditing(null)} />
     </section>
+  )
+}
+
+const STATUS_LABEL: Record<JarEntry['status'], string> = { unpaid: 'Por pagar', paid: 'Paga', void: 'Anulada' }
+const KIND_LABEL: Record<JarEntry['kind'], string> = { penalty: 'Multa', payment: 'Pagamento', spend: 'Gasto', adjust: 'Ajuste' }
+
+// Corrigir um movimento do jarro: mudar valor, motivo e estado, ou apagá-lo. Fica tudo no registo.
+function JarEditSheet({ entry, onClose }: { entry: JarEntry | null; onClose: () => void }) {
+  const { snap, run, toast } = useApp()
+  return (
+    <Sheet open={!!entry} onClose={onClose} title={entry ? `Corrigir ${KIND_LABEL[entry.kind].toLowerCase()}` : ''}>
+      {entry && <JarEditForm key={entry.id} entry={entry} who={snap.profiles.find((p) => p.id === entry.profile_id)?.display_name ?? null} run={run} toast={toast} onClose={onClose} />}
+    </Sheet>
+  )
+}
+
+function JarEditForm({ entry, who, run, toast, onClose }: { entry: JarEntry; who: string | null; run: ReturnType<typeof useApp>['run']; toast: ReturnType<typeof useApp>['toast']; onClose: () => void }) {
+  const [amount, setAmount] = useState((entry.amount_cents / 100).toFixed(2).replace('.', ','))
+  const [reason, setReason] = useState(entry.reason)
+  const [status, setStatus] = useState<JarEntry['status']>(entry.status)
+  const [deleting, setDeleting] = useState(false)
+  const [delReason, setDelReason] = useState('')
+  const save = async () => {
+    const cents = Math.round(Number(amount.replace(',', '.')) * 100)
+    if (!Number.isFinite(cents) || cents <= 0) return toast('Escreve um valor em euros, por exemplo 12,50.', 'error')
+    if (!reason.trim()) return toast('Escreve o motivo.', 'error')
+    const ok = await run(() => api.updateJarEntry(entry.id, { amount_cents: cents, reason: reason.trim(), status }).then(() => true), 'Movimento corrigido')
+    if (ok) onClose()
+  }
+  const remove = async () => {
+    const ok = await run(() => api.deleteJarEntry(entry.id, delReason.trim()).then(() => true), 'Movimento apagado')
+    if (ok) onClose()
+  }
+  if (deleting) return (
+    <div className="stack">
+      <p style={{ color: 'var(--ink-2)' }}>Vai ser {entry.kind === 'penalty' ? 'apagada a multa' : 'apagado o movimento'} de {euros(entry.amount_cents)}{who ? ` (${who})` : ''}. Sai das contas do jarro e fica no registo com o motivo. Não dá para desfazer.</p>
+      <label className="field"><span>Motivo</span><input className="input" value={delReason} onChange={(e) => setDelReason(e.target.value)} placeholder="Registado em duplicado" /></label>
+      <button className="btn danger big block" disabled={!delReason.trim()} onClick={remove}>Apagar</button>
+      <button className="btn ghost block" onClick={() => setDeleting(false)}>Voltar</button>
+    </div>
+  )
+  return (
+    <div className="stack">
+      {who && <p className="small muted">{who}{entry.month_key ? `, ${monthLabel(entry.month_key)}` : ''}</p>}
+      <label className="field"><span>Valor (€)</span><input className="input num" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} /></label>
+      <label className="field"><span>Motivo</span><input className="input" value={reason} onChange={(e) => setReason(e.target.value)} /></label>
+      {(entry.kind === 'penalty' || entry.kind === 'payment') ? (
+        <div className="field"><span>Estado</span>
+          <div className="seg">
+            {(['unpaid', 'paid', 'void'] as const).map((st) => <button key={st} aria-pressed={status === st} onClick={() => setStatus(st)}>{STATUS_LABEL[st]}</button>)}
+          </div>
+        </div>
+      ) : (
+        <label className="row between">
+          <span className="small">Anulado (deixa de contar)</span>
+          <Switch checked={status === 'void'} onChange={(v) => setStatus(v ? 'void' : 'paid')} label="Anulado" />
+        </label>
+      )}
+      <button className="btn primary big block" onClick={save}>Guardar correção</button>
+      <button className="btn danger block" onClick={() => setDeleting(true)}>Apagar movimento</button>
+    </div>
   )
 }
 

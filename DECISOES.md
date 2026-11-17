@@ -47,6 +47,7 @@ Registo das decisões fechadas com o Bruno antes de construir. Quando uma regra 
 - Desculpa pendente: o dia não conta como falha. O fecho do mês dessa pessoa espera pela decisão. Se no **dia 5 às 23h59** ainda não houver decisão, é aceite automaticamente.
 - O dinheiro é gasto em conjunto. A app não mexe em dinheiro real.
 - O fecho é idempotente e tudo fica na auditoria.
+- No backoffice (Jarro) o admin pode corrigir qualquer movimento (valor, motivo, estado) ou apagá-lo com motivo. Em Desculpas pode mudar uma decisão (aprovada ↔ recusada); o dia acompanha. Num mês já fechado as multas não são recalculadas: corrigem-se à mão no Jarro.
 
 ## Gamificação
 

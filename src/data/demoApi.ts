@@ -200,6 +200,25 @@ export const demoApi: DataApi = {
       if (pd && approve) pd.status = 'excused'
     }, { action: approve ? 'excuse.approve' : 'excuse.reject', entity: 'excuse', entity_id: id, detail: approve ? 'Desculpa aprovada' : 'Desculpa rejeitada' })
   },
+  async changeExcuseDecision(id, approve) {
+    requireAdmin()
+    const snap = load()
+    const e = snap.excuses.find((x) => x.id === id)
+    if (!e) throw new Error('Esta desculpa já não existe.')
+    if (e.status === 'pending') throw new Error('Esta desculpa ainda está por decidir.')
+    if ((e.status === 'approved') === approve) return
+    if (approve && snap.excuses.some((x) => x.planned_day_id === e.planned_day_id && x.id !== id && x.status !== 'rejected')) throw new Error('Este dia já tem outra desculpa.')
+    const closed = snap.closures.some((c) => c.profile_id === e.profile_id && c.month_key === monthKey(e.date))
+    mutate((s) => {
+      const x = s.excuses.find((y) => y.id === id)!
+      x.status = approve ? 'approved' : 'rejected'
+      x.decided_by = currentUser
+      x.decided_at = now()
+      x.auto = false
+      const pd = s.plannedDays.find((d) => d.id === x.planned_day_id)
+      if (pd && pd.status !== 'done') pd.status = approve ? 'excused' : closed ? 'missed' : 'planned'
+    }, { action: approve ? 'excuse.change_approve' : 'excuse.change_reject', entity: 'excuse', entity_id: id, detail: `Decisão mudada para ${approve ? 'aprovada' : 'recusada'} (${e.date}${closed ? ', mês já fechado' : ''})` })
+  },
   async savePlan(plan) {
     mutate((s) => {
       const i = s.plans.findIndex((p) => p.id === plan.id)
@@ -258,6 +277,26 @@ export const demoApi: DataApi = {
     mutate((s) => {
       s.jar.push({ id: uid(), profile_id: e.profile_id, kind: e.kind, amount_cents: e.amount_cents, reason: e.reason, related_days: [], status: 'paid', month_key: null, created_by: currentUser, created_at: now() })
     }, { action: `jar.${e.kind}`, entity: 'jar', detail: `${e.reason}: ${e.amount_cents / 100} €` })
+  },
+  async updateJarEntry(id, patch) {
+    requireAdmin()
+    const j = load().jar.find((x) => x.id === id)
+    if (!j) throw new Error('Este movimento já não existe.')
+    if (!(patch.amount_cents > 0)) throw new Error('O valor tem de ser maior que zero.')
+    if (!patch.reason.trim()) throw new Error('Escreve o motivo.')
+    const detail = `Corrigido: ${j.amount_cents / 100} € → ${patch.amount_cents / 100} €${j.reason !== patch.reason.trim() ? `, "${j.reason}" → "${patch.reason.trim()}"` : ''}${j.status !== patch.status ? `, ${j.status} → ${patch.status}` : ''}`
+    mutate((s) => {
+      const e = s.jar.find((x) => x.id === id)
+      if (e) Object.assign(e, { amount_cents: patch.amount_cents, reason: patch.reason.trim(), status: patch.status })
+    }, { action: 'jar.edit', entity: 'jar_entry', entity_id: id, detail })
+  },
+  async deleteJarEntry(id, reason) {
+    requireAdmin()
+    if (!reason.trim()) throw new Error('Para apagar é preciso um motivo.')
+    const j = load().jar.find((x) => x.id === id)
+    if (!j) throw new Error('Este movimento já não existe.')
+    mutate((s) => { s.jar = s.jar.filter((x) => x.id !== id) },
+      { action: 'jar.delete', entity: 'jar_entry', entity_id: id, detail: `Apagado (${j.kind}, ${j.amount_cents / 100} €, "${j.reason}"): ${reason.trim()}` })
   },
   async createMember(m) {
     requireAdmin()
