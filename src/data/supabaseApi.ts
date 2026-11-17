@@ -220,6 +220,9 @@ export function createSupabaseApi(url: string, anon: string): DataApi {
     async decideExcuse(id, approve) {
       must(await sb.rpc('decide_excuse', { p_id: id, p_approve: approve }))
     },
+    async changeExcuseDecision(id, approve) {
+      must(await sb.rpc('change_excuse_decision', { p_id: id, p_approve: approve }))
+    },
     async savePlan(plan) {
       must(await sb.from('plans').upsert({ ...plan, updated_at: new Date().toISOString() }))
     },
@@ -257,6 +260,12 @@ export function createSupabaseApi(url: string, anon: string): DataApi {
     async addJarEntry(e) {
       must(await sb.from('jar_entries').insert({ ...e, status: 'paid', created_by: uid }))
       await audit(`jar.${e.kind}`, 'jar', null, `${e.reason}: ${e.amount_cents / 100} €`)
+    },
+    async updateJarEntry(id, patch) {
+      must(await sb.rpc('update_jar_entry', { p_id: id, p_amount_cents: patch.amount_cents, p_reason: patch.reason, p_status: patch.status }))
+    },
+    async deleteJarEntry(id, reason) {
+      must(await sb.rpc('delete_jar_entry', { p_id: id, p_reason: reason }))
     },
     async createMember(m) {
       const r = await sb.functions.invoke('admin-users', { body: { action: 'create', ...m } })
