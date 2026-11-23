@@ -1,18 +1,29 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { MyPlanner } from './Planear'
 import { useApp } from '../data/store'
 import { Avatar } from '../components/Avatar'
 import { DayActions, STATE_LABEL } from '../components/DayActions'
-import { Sheet, TopBar } from '../components/ui'
+import { Seg, Sheet, TopBar } from '../components/ui'
 import { cmp, dayOfMonth, longDate, monthDays, monthKey, monthLabel, nextMonth, prevMonth, WEEKDAY_SHORT, weekday } from '../lib/dates'
 import type { PlannedDay } from '../data/types'
 import type { DayState } from '../lib/rules/planning'
 
 export function Calendario() {
   const { snap, me, today, stateOf } = useApp()
-  const [mk, setMk] = useState(monthKey(today))
-  const [view, setView] = useState<'familia' | 'eu'>('eu')
+  // a vista e o mês ficam no endereço: voltar atrás ou partilhar o link abre o mesmo ecrã
+  const [params, setParams] = useSearchParams()
+  const mk = /^\d{4}-\d{2}$/.test(params.get('mes') ?? '') ? params.get('mes')! : monthKey(today)
+  const view: 'familia' | 'eu' = params.get('vista') === 'familia' ? 'familia' : 'eu'
+  const go = (next: { mes?: string; vista?: 'familia' | 'eu' }) => {
+    const m = next.mes ?? mk
+    const v = next.vista ?? view
+    const p: Record<string, string> = {}
+    if (m !== monthKey(today)) p.mes = m
+    if (v === 'familia') p.vista = 'familia'
+    setParams(p, { replace: true })
+  }
   const [selDay, setSelDay] = useState<string | null>(null)
   const [myDay, setMyDay] = useState<PlannedDay | null>(null)
   const people = snap.profiles.filter((p) => p.active)
@@ -31,14 +42,11 @@ export function Calendario() {
   return (
     <main className="page">
       <TopBar title="Calendário" />
-      <div className="seg" role="group" aria-label="Vista">
-        <button aria-pressed={view === 'eu'} onClick={() => setView('eu')}>O meu</button>
-        <button aria-pressed={view === 'familia'} onClick={() => setView('familia')}>Família</button>
-      </div>
+      <Seg label="Vista" value={view} options={[['eu', 'O meu'], ['familia', 'Família']] as const} onChange={(v) => go({ vista: v })} />
       <div className="row between">
-        <button className="icon-btn" aria-label="Mês anterior" onClick={() => setMk(prevMonth(mk))}><CaretLeft size={20} weight="bold" /></button>
+        <button className="icon-btn" aria-label="Mês anterior" onClick={() => go({ mes: prevMonth(mk) })}><CaretLeft size={20} weight="bold" /></button>
         <h2>{monthLabel(mk)}</h2>
-        <button className="icon-btn" aria-label="Mês seguinte" onClick={() => setMk(nextMonth(mk))}><CaretRight size={20} weight="bold" /></button>
+        <button className="icon-btn" aria-label="Mês seguinte" onClick={() => go({ mes: nextMonth(mk) })}><CaretRight size={20} weight="bold" /></button>
       </div>
 
       {view === 'eu' ? <MyPlanner mk={mk} /> : (

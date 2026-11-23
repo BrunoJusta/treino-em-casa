@@ -1,5 +1,5 @@
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { AnimatePresence, animate, motion, useDragControls, useReducedMotion, type PanInfo } from 'motion/react'
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Barbell, CalendarDots, House, UsersThree, X } from '@phosphor-icons/react'
 import { Avatar } from './Avatar'
@@ -14,6 +14,7 @@ import { api } from '../lib/config'
 export function Sheet({ open, onClose, title, children, footer }: { open: boolean; onClose: () => void; title?: string; children: ReactNode; footer?: ReactNode }) {
   const reduce = useReducedMotion()
   const ref = useRef<HTMLDivElement>(null)
+  const drag = useDragControls()
   const closeRef = useRef(onClose)
   closeRef.current = onClose
   useEffect(() => {
@@ -51,10 +52,17 @@ export function Sheet({ open, onClose, title, children, footer }: { open: boolea
             exit={reduce ? { opacity: 0 } : { y: '100%' }}
             transition={{ type: 'spring', stiffness: 380, damping: 36 }}
             onClick={(e) => e.stopPropagation()}
+            // arrastar para baixo pela pega ou pelo título fecha; um gesto rápido chega, não é preciso ir até ao fundo
+            drag={reduce ? false : 'y'}
+            dragControls={drag}
+            dragListener={false}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0.05, bottom: 0.9 }}
+            onDragEnd={(_: unknown, info: PanInfo) => { if (info.offset.y > 120 || info.velocity.y > 600) onClose() }}
           >
-            <div className="grab" aria-hidden />
+            <div className="grab-zone" onPointerDown={(e) => drag.start(e)} aria-hidden><div className="grab" /></div>
             {title && (
-              <div className="sheet-head">
+              <div className="sheet-head" onPointerDown={(e) => { if (!(e.target as HTMLElement).closest('button')) drag.start(e) }}>
                 <h2>{title}</h2>
                 <button className="icon-btn plain" onClick={onClose} aria-label="Fechar"><X size={22} weight="bold" /></button>
               </div>
@@ -83,13 +91,51 @@ export function BottomNav() {
     <nav className="nav" aria-label="Navegação principal">
       {items.map((i) => (
         <NavLink key={i.to} to={i.to} end={i.end} className={({ isActive }) => (isActive ? 'active' : '')}>
-          <span className="nav-ico">{i.icon}</span>
-          {i.label}
-          {!!i.badge && <span className="dot"><span aria-hidden>{i.badge}</span><span className="sr-only">, {i.badge} por ver</span></span>}
+          {({ isActive }) => (
+            <>
+              <span className="nav-ico">
+                {isActive && <motion.span layoutId="nav-pill" className="nav-pill" transition={{ type: 'spring', duration: 0.3, bounce: 0.15 }} />}
+                <span className="nav-ico-glyph">{i.icon}</span>
+              </span>
+              {i.label}
+              {!!i.badge && <span className="dot"><span aria-hidden>{i.badge}</span><span className="sr-only">, {i.badge} por ver</span></span>}
+            </>
+          )}
         </NavLink>
       ))}
     </nav>
   )
+}
+
+/** Escolha entre 2 a 4 opções, com um fundo que desliza para a opção escolhida. */
+export function Seg<T extends string>({ value, options, onChange, label, style }: { value: T; options: readonly (readonly [T, string])[]; onChange: (v: T) => void; label: string; style?: CSSProperties }) {
+  const id = useId()
+  return (
+    <div className="seg" role="group" aria-label={label} style={style}>
+      {options.map(([v, text]) => (
+        <button key={v} type="button" aria-pressed={value === v} onClick={() => onChange(v)}>
+          {value === v && <motion.span layoutId={`seg-${id}`} className="seg-thumb" transition={{ type: 'spring', duration: 0.28, bounce: 0.12 }} />}
+          <span className="seg-label">{text}</span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+/** Número que conta até ao valor novo quando muda (não anima na primeira vez que aparece). */
+export function AnimatedNumber({ value, format }: { value: number; format: (n: number) => string }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const prev = useRef(value)
+  const reduce = useReducedMotion()
+  useEffect(() => {
+    const el = ref.current
+    const from = prev.current
+    prev.current = value
+    if (!el || from === value || reduce) { if (el) el.textContent = format(value); return }
+    const c = animate(from, value, { duration: 0.6, ease: [0.23, 1, 0.32, 1], onUpdate: (v) => { el.textContent = format(Math.round(v)) } })
+    return () => c.stop()
+  }, [value, format, reduce])
+  return <span ref={ref}>{format(value)}</span>
 }
 
 export function BackHeader({ title, right, to }: { title: string; right?: ReactNode; to?: string }) {
@@ -109,7 +155,7 @@ export function Toasts() {
     <div className="toasts" aria-live="polite">
       <AnimatePresence>
         {toasts.map((t) => (
-          <motion.div key={t.id} role={t.tone === 'error' ? 'alert' : 'status'} className={`toast ${t.tone ?? ''}`} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }}>
+          <motion.div key={t.id} role={t.tone === 'error' ? 'alert' : 'status'} className={`toast ${t.tone ?? ''}`} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1, transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] } }} exit={{ y: -12, opacity: 0, transition: { duration: 0.18, ease: [0.23, 1, 0.32, 1] } }}>
             {t.text}
           </motion.div>
         ))}
@@ -137,7 +183,7 @@ export function CelebrationOverlay() {
     <AnimatePresence>
       {celebration && (
         <motion.div className="celebrate" role="dialog" aria-modal="true" aria-labelledby="celebrate-title" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => celebrate(null)}>
-          <motion.div className="celebrate-card" initial={{ scale: 0.8, y: 20 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
+          <motion.div className="celebrate-card" initial={{ scale: 0.9, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
             <JarMascot mood={celebration.kind === 'coin' ? 'wow' : 'party'} level={0.5} size={130} />
             {celebration.kind === 'levelup' && <div className="pixel-frame pixel-type">Nível {celebration.level}</div>}
             <h1 id="celebrate-title">{celebration.title}</h1>

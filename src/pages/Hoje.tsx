@@ -131,9 +131,20 @@ export function Hoje() {
 
       <LiveWalkBanner />
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}>{hero}</motion.div>
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}>{hero}</motion.div>
 
-      <button className="btn walk-soft big block" onClick={() => setWalkOpen(true)}><PixelIcon name="walk" size={26} /> Registar caminhada</button>
+      {risk > 0 && (
+        <div className="card danger row">
+          <JarMascot mood="wow" level={0.3} size={46} bounce={false} />
+          <div className="grow">
+            <p className="strong">{p.risk.certain_cents ? `Se o mês fechasse hoje, ias pôr ${euros(risk)} no jarro` : p.risk.week ? `${p.risk.week.missing === 1 ? 'Falta 1 treino' : `Faltam ${p.risk.week.missing} treinos`} esta semana: ${euros(risk)} em risco` : `Se não recuperares até domingo, vais pôr ${euros(risk)} no jarro`}</p>
+            <p className="small" style={{ color: 'var(--ink-2)' }}>{riskText(p.risk, snap.settings)}</p>
+            {p.risk.week && <WeekPips done={p.risk.week.done} required={p.risk.week.required} />}
+          </div>
+        </div>
+      )}
+
+      <button className="btn walk-soft block" onClick={() => setWalkOpen(true)}><PixelIcon name="walk" size={22} /> Registar caminhada</button>
       <WalkSheet open={walkOpen} onClose={() => setWalkOpen(false)} />
 
       {pendingExcuses.length > 0 && (
@@ -142,16 +153,6 @@ export function Hoje() {
           <div className="grow"><p className="strong">{pendingExcuses.length === 1 ? 'Tens 1 desculpa para decidir' : `Tens ${pendingExcuses.length} desculpas para decidir`}</p><p className="small muted">Ficam pendentes até decidires.</p></div>
           <CaretRight size={20} />
         </Link>
-      )}
-
-      {risk > 0 && (
-        <div className="card danger row">
-          <JarMascot mood="wow" level={0.3} size={46} bounce={false} />
-          <div className="grow">
-            <p className="strong">{p.risk.certain_cents ? `Se o mês fechasse hoje, ias pôr ${euros(risk)} no jarro` : p.risk.week ? `${p.risk.week.missing === 1 ? 'Falta 1 treino' : `Faltam ${p.risk.week.missing} treinos`} esta semana: ${euros(risk)} em risco` : `Se não recuperares até domingo, vais pôr ${euros(risk)} no jarro`}</p>
-            <p className="small" style={{ color: 'var(--ink-2)' }}>{riskText(p.risk, snap.settings)}</p>
-          </div>
-        </div>
       )}
 
       {needsPlanning && (
@@ -201,10 +202,23 @@ export function Hoje() {
             <p className="small grow">{names(trainedToday.map((x) => x.display_name))} {trainedToday.length === 1 ? 'já treinou' : 'já treinaram'}.</p>
           </div>
         ) : (
-          <div className="card soft"><p className="small muted">Ainda ninguém treinou hoje. Sê o primeiro e ganha o "treino a dois" se alguém for a seguir.</p></div>
+          <div className="card soft"><p className="small muted">Ainda ninguém treinou hoje. Sê o primeiro e ganha o “treino a dois” se alguém for a seguir.</p></div>
         )}
       </section>
     </main>
+  )
+}
+
+// Treinos da semana: um quadrado por treino pedido, que se enche (com mola) quando o treino é feito.
+function WeekPips({ done, required }: { done: number; required: number }) {
+  return (
+    <div className="week-pips" role="img" aria-label={`${done} de ${required} treinos feitos esta semana`}>
+      {Array.from({ length: required }, (_, i) => (
+        <span key={i} className="week-pip">
+          {i < done && <motion.i initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', duration: 0.4, bounce: 0.3, delay: 0.15 + i * 0.06 }} />}
+        </span>
+      ))}
+    </div>
   )
 }
 

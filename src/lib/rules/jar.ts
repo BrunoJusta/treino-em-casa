@@ -137,9 +137,11 @@ export function owedBy(jar: JarEntry[], profiles: Profile[]) {
     .filter((x) => x.cents > 0)
 }
 
+const EUR_WHOLE = new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 })
+const EUR_CENTS = new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 })
+/** 5 € ou 2,50 € (com espaço que não parte a linha). */
 export function euros(cents: number): string {
-  const v = cents / 100
-  return `${Number.isInteger(v) ? v : v.toFixed(2).replace('.', ',')} €`
+  return (cents % 100 === 0 ? EUR_WHOLE : EUR_CENTS).format(cents / 100)
 }
 
 /** Regra semanal (consecutive_misses = 1): multa por treino em falta em cada semana, lançada à segunda-feira. Com 2 ou mais volta a regra antiga das falhas seguidas, no fecho do mês. */
