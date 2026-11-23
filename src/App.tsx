@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { MotionConfig } from 'motion/react'
 import { useStore } from './data/store'
 import { BottomNav, CelebrationOverlay, Toasts } from './components/ui'
 import { JarMascot } from './components/pixel/JarMascot'
@@ -34,7 +35,11 @@ export function App() {
   }
   const showNav = !NO_NAV.some((p) => loc.pathname.startsWith(p))
   return (
+    // com "menos movimento" ligado no telemóvel, o Motion tira deslocações e escalas e mantém as transições de opacidade
+    <MotionConfig reducedMotion="user">
     <div className={`app ${loc.pathname.startsWith('/admin') ? 'wide' : ''}`}>
+      <a className="skip-link" href="#conteudo">Saltar para o conteúdo</a>
+      <div id="conteudo" tabIndex={-1} style={{ outline: 'none' }}>
       <Routes>
         <Route path="/" element={<Hoje />} />
         <Route path="/calendario" element={<Calendario />} />
@@ -53,10 +58,12 @@ export function App() {
         <Route path="/admin/*" element={<Admin />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </div>
       {showNav && <BottomNav />}
       <Toasts />
       <CelebrationOverlay />
     </div>
+    </MotionConfig>
   )
 }
 

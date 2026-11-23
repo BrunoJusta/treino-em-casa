@@ -63,6 +63,7 @@ button { cursor: pointer; }
 img, svg { display: block; }
 a { color: var(--accent-text); text-decoration: none; font-weight: 600; }
 h1, h2, h3, h4, p { margin: 0; }
+h1, h2 { text-wrap: balance; }
 h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
 h2 { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
 h3 { font-size: 17px; font-weight: 650; }
@@ -75,6 +76,8 @@ h3 { font-size: 17px; font-weight: 650; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
 
 :focus-visible { outline: 3px solid var(--accent-text); outline-offset: 2px; border-radius: 8px; }
+.skip-link { position: fixed; z-index: 100; left: 12px; top: calc(8px + var(--safe-t)); padding: 10px 14px; border-radius: 12px; background: var(--ink); color: #fff; transform: translateY(-160%); transition: transform 0.2s var(--ease); }
+.skip-link:focus-visible { transform: none; }
 
 /* ---------- Estrutura ---------- */
 .app { max-width: 560px; margin: 0 auto; min-height: 100dvh; position: relative; }
@@ -142,8 +145,12 @@ button.chip { min-height: 36px; }
 .chips::-webkit-scrollbar { display: none; }
 
 .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--surface-2); padding: 4px; border-radius: 14px; gap: 4px; }
-.seg button { min-height: 40px; border: 0; border-radius: 10px; background: transparent; font-weight: 600; color: var(--ink-2); }
+.seg button { min-height: 40px; border: 0; border-radius: 10px; background: transparent; font-weight: 600; color: var(--ink-2); position: relative; transition: color 0.2s; }
 .seg button[aria-pressed='true'] { background: var(--bg); color: var(--ink); box-shadow: 0 1px 3px rgba(76, 79, 105, 0.15); }
+/* Seg com fundo que desliza: o botão escolhido fica transparente e o fundo é o thumb */
+.seg button:has(.seg-thumb) { background: transparent; box-shadow: none; }
+.seg-thumb { position: absolute; inset: 0; border-radius: 10px; background: var(--bg); box-shadow: 0 1px 3px rgba(76, 79, 105, 0.15); }
+.seg-label { position: relative; }
 
 /* ---------- Formulários ---------- */
 .field { display: flex; flex-direction: column; gap: 6px; }
@@ -195,15 +202,22 @@ button.list-item:active { background: var(--surface); }
 }
 .nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 54px; border-radius: 14px; color: var(--muted); text-decoration: none; font-size: 12.5px; font-weight: 600; position: relative; min-width: 0; }
 .nav a.active { color: var(--ink); }
-.nav a.active .nav-ico { background: var(--accent-soft); color: var(--accent-text); }
-.nav-ico { width: 52px; height: 30px; border-radius: 999px; display: grid; place-items: center; transition: background 0.2s; }
+.nav a.active .nav-ico { color: var(--accent-text); }
+.nav-ico { width: 52px; height: 30px; border-radius: 999px; display: grid; place-items: center; position: relative; transition: color 0.2s; }
+/* o fundo do separador ativo desliza de um ícone para o outro */
+.nav-pill { position: absolute; inset: 0; border-radius: 999px; background: var(--accent-soft); }
+.nav-ico-glyph { position: relative; display: grid; place-items: center; transition: transform 0.16s var(--ease); }
+.nav a:active .nav-ico-glyph { transform: scale(0.88); }
 .nav .dot { position: absolute; top: 6px; right: calc(50% - 22px); min-width: 18px; height: 18px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; padding: 0 5px; box-shadow: 0 0 0 2px #fff; }
 
 /* ---------- Sheet / modal ---------- */
 .overlay { position: fixed; inset: 0; background: rgba(36, 38, 56, 0.38); z-index: 40; display: flex; align-items: flex-end; justify-content: center; }
 .sheet { background: var(--bg); width: 100%; max-width: 560px; border-radius: 26px 26px 0 0; padding: 10px 16px calc(20px + var(--safe-b)); max-height: 92dvh; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 16px; }
 .sheet > * { flex-shrink: 0; }
-.sheet .grab { width: 44px; height: 5px; border-radius: 999px; background: var(--line-strong); margin: 0 auto 4px; }
+.sheet .grab { width: 44px; height: 5px; border-radius: 999px; background: var(--line-strong); margin: 0 auto; }
+/* zona de 24px para agarrar a folha e puxar para baixo */
+.grab-zone { padding: 6px 0 8px; margin: -10px -16px -8px; cursor: grab; touch-action: none; }
+.sheet-head { touch-action: pan-x; }
 .sheet-head { display: flex; align-items: center; gap: 12px; }
 .sheet-head h2 { flex: 1; }
 
@@ -246,6 +260,9 @@ button.cal-day { cursor: pointer; }
 .week-flag { font-size: 12px; font-weight: 600; text-align: right; padding-right: 2px; }
 
 /* ---------- Hoje ---------- */
+.week-pips { display: flex; gap: 6px; margin-top: 10px; }
+.week-pip { width: 28px; height: 10px; border-radius: 3px; background: rgba(200, 33, 63, 0.14); overflow: hidden; display: block; }
+.week-pip > i { display: block; width: 100%; height: 100%; background: var(--ok); border-radius: 3px; }
 .hero-today { border-radius: 26px; padding: 20px; background: var(--accent-soft); border: 1px solid var(--accent-line); display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden; }
 .hero-today.free { background: var(--surface); border-color: var(--line); }
 .hero-today.done { background: var(--ok-soft); border-color: #c9e7c1; }
@@ -318,10 +335,22 @@ button.cal-day { cursor: pointer; }
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 .pixel-type { font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
 
+/* ---------- Hover (só com rato; no telemóvel o toque já dá resposta) ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .btn.secondary:hover, .btn.ghost:hover { background: var(--surface); }
+  .btn.primary:hover { background: #2fb6e4; }
+  .icon-btn:hover { background: var(--surface); }
+  .card.tap:hover { border-color: var(--line-strong); }
+  button.list-item:hover:not(:disabled) { background: var(--surface); }
+  .seg button:hover { color: var(--ink); }
+  .nav a:hover { color: var(--ink); }
+  .plan-day:hover:not(:disabled) { border-color: var(--accent); }
+}
+
 /* Menos movimento não é zero: tira deslocações e escalas, mas mantém as mudanças de cor e de opacidade, que ajudam a perceber o que mudou. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
-  .btn:active, .card.tap:active, .icon-btn:active, .plan-day:active, .walk-choice:active, .shutter:active, .profile-link:active { transform: none; }
+  .btn:active, .card.tap:active, .icon-btn:active, .plan-day:active, .walk-choice:active, .shutter:active, .profile-link:active, .nav a:active .nav-ico-glyph { transform: none; }
   .bar > i, .switch-knob, .pocket-body { transition-duration: 0.01ms !important; }
 }
 

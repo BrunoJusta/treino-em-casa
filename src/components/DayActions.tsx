@@ -21,7 +21,7 @@ export const EXCUSE_LABEL: Record<ExcuseType, string> = { sick: 'Doente', injury
 
 export function DayActions({ day, onClose }: { day: PlannedDay | null; onClose: () => void }) {
   const { me, snap, today, run, stateOf, closedMonths } = useApp()
-  const [mode, setMode] = useState<'menu' | 'move' | 'excuse'>('menu')
+  const [mode, setMode] = useState<'menu' | 'move' | 'excuse' | 'delete'>('menu')
   const [exType, setExType] = useState<ExcuseType>('sick')
   const [note, setNote] = useState('')
   const close = () => { setMode('menu'); setNote(''); onClose() }
@@ -64,7 +64,7 @@ export function DayActions({ day, onClose }: { day: PlannedDay | null; onClose: 
           {canExcuse && <button className="btn secondary big block" onClick={() => setMode('excuse')}><FirstAidKit size={22} weight="bold" /> Pedir desculpa</button>}
           {((canChange && cmp(day.date, today) >= 0) || ((st === 'recover' || st === 'missed') && !monthClosed)) && (
             <div className="stack-sm">
-              <button className="btn danger block" disabled={!unmark.ok} aria-describedby={unmark.ok ? undefined : 'unmark-why'} onClick={() => run(() => api.removePlannedDay(day.id), 'Dia eliminado').then(close)}><Trash size={20} weight="bold" /> Eliminar este dia</button>
+              <button className="btn danger block" disabled={!unmark.ok} aria-describedby={unmark.ok ? undefined : 'unmark-why'} onClick={() => setMode('delete')}><Trash size={20} weight="bold" /> Eliminar este dia</button>
               {!unmark.ok && <p id="unmark-why" className="small muted">{unmark.reason}</p>}
               {unmarkWarn && <p className="small" style={{ color: 'var(--warn)' }}>{unmarkWarn}</p>}
             </div>
@@ -86,6 +86,15 @@ export function DayActions({ day, onClose }: { day: PlannedDay | null; onClose: 
               )
             })}
           </div>
+          <button className="btn ghost" onClick={() => setMode('menu')}>Voltar</button>
+        </div>
+      )}
+      {mode === 'delete' && (
+        <div className="stack">
+          <p style={{ color: 'var(--ink-2)' }}>{cmp(day.date, today) < 0
+            ? `Vais eliminar o dia ${dayOfMonth(day.date)}. Como já passou, não dá para o voltar a marcar.`
+            : `Vais eliminar o dia ${dayOfMonth(day.date)}. Podes voltar a marcá-lo no Calendário.`}</p>
+          <button className="btn danger big block" onClick={() => run(() => api.removePlannedDay(day.id), 'Dia eliminado').then(close)}><Trash size={20} weight="bold" /> Sim, eliminar</button>
           <button className="btn ghost" onClick={() => setMode('menu')}>Voltar</button>
         </div>
       )}

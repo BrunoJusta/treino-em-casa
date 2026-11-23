@@ -139,6 +139,7 @@ export function Hoje() {
           <div className="grow">
             <p className="strong">{p.risk.certain_cents ? `Se o mês fechasse hoje, ias pôr ${euros(risk)} no jarro` : p.risk.week ? `${p.risk.week.missing === 1 ? 'Falta 1 treino' : `Faltam ${p.risk.week.missing} treinos`} esta semana: ${euros(risk)} em risco` : `Se não recuperares até domingo, vais pôr ${euros(risk)} no jarro`}</p>
             <p className="small" style={{ color: 'var(--ink-2)' }}>{riskText(p.risk, snap.settings)}</p>
+            {p.risk.week && <WeekPips done={p.risk.week.done} required={p.risk.week.required} />}
           </div>
         </div>
       )}
@@ -201,10 +202,23 @@ export function Hoje() {
             <p className="small grow">{names(trainedToday.map((x) => x.display_name))} {trainedToday.length === 1 ? 'já treinou' : 'já treinaram'}.</p>
           </div>
         ) : (
-          <div className="card soft"><p className="small muted">Ainda ninguém treinou hoje. Sê o primeiro e ganha o "treino a dois" se alguém for a seguir.</p></div>
+          <div className="card soft"><p className="small muted">Ainda ninguém treinou hoje. Sê o primeiro e ganha o “treino a dois” se alguém for a seguir.</p></div>
         )}
       </section>
     </main>
+  )
+}
+
+// Treinos da semana: um quadrado por treino pedido, que se enche (com mola) quando o treino é feito.
+function WeekPips({ done, required }: { done: number; required: number }) {
+  return (
+    <div className="week-pips" role="img" aria-label={`${done} de ${required} treinos feitos esta semana`}>
+      {Array.from({ length: required }, (_, i) => (
+        <span key={i} className="week-pip">
+          {i < done && <motion.i initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', duration: 0.4, bounce: 0.3, delay: 0.15 + i * 0.06 }} />}
+        </span>
+      ))}
+    </div>
   )
 }
 

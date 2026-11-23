@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { BookOpen, CheckCircle, Coins, ForkKnife } from '@phosphor-icons/react'
 import { useApp } from '../data/store'
 import { useFamily, usePerson } from '../data/derived'
 import { api } from '../lib/config'
 import { JarMascot, FallingCoin } from '../components/pixel/JarMascot'
 import { Avatar } from '../components/Avatar'
-import { Bar, ConfirmSheet, Empty, Sheet, TopBar } from '../components/ui'
+import { AnimatedNumber, Bar, ConfirmSheet, Empty, Sheet, TopBar } from '../components/ui'
 import { euros, owedBy, riskText } from '../lib/rules/jar'
 import { shortDate, timeAgo, monthName } from '../lib/dates'
 import { sfx } from '../lib/fx'
@@ -57,7 +58,7 @@ export function Jarro() {
           <JarMascot level={level} mood={drops ? 'wow' : fam.jar.potential === 0 ? 'party' : 'happy'} size={112} label={`O Jarro tem ${euros(fam.jar.balance)}`} />
         </div>
         <div className="center">
-          <p className="num" style={{ fontSize: 44, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>{euros(fam.jar.balance)}</p>
+          <p className="num" style={{ fontSize: 44, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}><AnimatedNumber value={fam.jar.balance} format={euros} /></p>
           <p className="small muted">no jarro{fam.jar.owed ? `, mais ${euros(fam.jar.owed)} por pagar` : ''}</p>
         </div>
         <div style={{ width: '100%' }} className="stack-sm">
@@ -76,13 +77,16 @@ export function Jarro() {
         <h2>Por pagar</h2>
         {owed.length ? (
           <div className="list">
+            <AnimatePresence initial={false}>
             {owed.map(({ profile, cents }) => (
-              <div key={profile.id} className="list-item">
+              // quem paga sai da lista a encolher, em vez de desaparecer de repente
+              <motion.div key={profile.id} className="list-item" exit={{ opacity: 0, height: 0, minHeight: 0, paddingTop: 0, paddingBottom: 0 }} transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }} style={{ overflow: 'hidden' }}>
                 <Avatar avatar={profile.avatar} color={profile.color} name={profile.display_name} size={40} />
                 <div className="grow"><p className="strong">{profile.display_name}</p><p className="small muted num">{euros(cents)}</p></div>
                 {isAdmin && <button className="btn secondary sm" onClick={() => setPayFor(profile.id)}><Coins size={18} weight="bold" /> Pagou</button>}
-              </div>
+              </motion.div>
             ))}
+            </AnimatePresence>
           </div>
         ) : (
           <div className="card soft"><p className="small muted">Ninguém deve nada. O jarro está em dia.</p></div>
@@ -97,7 +101,7 @@ export function Jarro() {
       <Sheet open={rules} onClose={() => setRules(false)} title="Regras do jarro">
         <ul className="small" style={{ margin: 0, paddingLeft: 18, color: 'var(--ink-2)', display: 'flex', flexDirection: 'column', gap: 6 }}>
           <li>Cada pessoa marca pelo menos {me.min_days_week} dias por semana (1 nas semanas cortadas do mês, nenhum nas semanas com um só dia). Planeia-se de dia 1 a {s.plan_window_end_day}.</li>
-          <li>Os dias mudam-se quando quiseres, dentro do mesmo mês. Um dia que passou sem treino fica "por recuperar" até domingo e só se muda para um dia dessa semana. Quando a semana acaba, conta como falha.</li>
+          <li>Os dias mudam-se quando quiseres, dentro do mesmo mês. Um dia que passou sem treino fica “por recuperar” até domingo e só se muda para um dia dessa semana. Quando a semana acaba, conta como falha.</li>
           <li>{s.consecutive_misses <= 1 ? `Conta o que fazes, não o que marcas: cada semana pede ${me.min_days_week} treinos feitos (menos nas semanas cortadas do mês). Cada treino em falta custa ${euros(s.penalty_cents)}, lançado à segunda-feira no fecho da semana. Uma desculpa aprovada conta como treino.` : `No dia 1 fecha-se o mês anterior. Cada falha a partir da ${s.consecutive_misses}.ª seguida custa ${euros(s.penalty_cents)}.`}</li>
           {s.consecutive_misses > 1 && <li>Um treino feito, ou uma desculpa aprovada, põe o contador a zero. O contador não passa de um mês para o outro.</li>}
           <li>Máximo de {euros(s.monthly_cap_cents)} por pessoa por mês.</li>
@@ -121,7 +125,7 @@ export function Jarro() {
                     <p className="tiny muted">{j.kind === 'penalty' ? j.related_days.map(shortDate).join(' e ') : ''} {timeAgo(j.created_at)}</p>
                   </div>
                   <div className="center">
-                    <p className={`num strong ${j.kind === 'spend' ? '' : ''}`} style={{ color: j.kind === 'spend' ? 'var(--ok)' : undefined, textDecoration: j.status === 'void' ? 'line-through' : undefined }}>{j.kind === 'spend' ? '-' : '+'}{euros(j.amount_cents)}</p>
+                    <p className="num strong" style={{ color: j.kind === 'spend' ? 'var(--ok)' : undefined, textDecoration: j.status === 'void' ? 'line-through' : undefined }}>{j.kind === 'spend' ? '−' : '+'}{euros(j.amount_cents)}</p>
                     <p className="tiny muted">{j.status === 'unpaid' ? 'por pagar' : j.status === 'void' ? 'anulada' : j.kind === 'penalty' ? 'paga' : ''}</p>
                   </div>
                 </div>

@@ -7,7 +7,7 @@ import { buildFeed, useFamily } from '../data/derived'
 import { api } from '../lib/config'
 import { Avatar } from '../components/Avatar'
 import { PixelIcon } from '../components/pixel/Pixel'
-import { Bar, Empty, Photo, Sheet, TopBar } from '../components/ui'
+import { Bar, Empty, Photo, Sheet, TopBar, Seg } from '../components/ui'
 import { monthKey, monthLabel, timeAgo } from '../lib/dates'
 import { BADGES, collectiveBadges, levelFor, rankingFor, xpFor } from '../lib/rules/game'
 import { sfx } from '../lib/fx'
@@ -25,11 +25,7 @@ export function Familia() {
   return (
     <main className="page">
       <TopBar title="Família" />
-      <div className="seg">
-        <button aria-pressed={tab === 'feed'} onClick={() => setParams({})}>Feed</button>
-        <button aria-pressed={tab === 'ranking'} onClick={() => setParams({ tab: 'ranking' })}>Ranking</button>
-        <button aria-pressed={tab === 'conquistas'} onClick={() => setParams({ tab: 'conquistas' })}>Conquistas</button>
-      </div>
+      <Seg label="Secções da família" value={tab} options={[['feed', 'Feed'], ['ranking', 'Ranking'], ['conquistas', 'Conquistas']] as const} onChange={(v) => setParams(v === 'feed' ? {} : { tab: v })} />
       {tab === 'feed' && <Feed />}
       {tab === 'ranking' && <Ranking />}
       {tab === 'conquistas' && <Conquistas />}
