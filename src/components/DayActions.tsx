@@ -62,7 +62,7 @@ export function DayActions({ day, onClose }: { day: PlannedDay | null; onClose: 
           {!canChange && plan && <p className="row-sm"><Barbell size={18} /> {plan.name}</p>}
           {canChange && <button className="btn secondary big block" onClick={() => setMode('move')}><ArrowsLeftRight size={22} weight="bold" /> Mudar para outro dia</button>}
           {canExcuse && <button className="btn secondary big block" onClick={() => setMode('excuse')}><FirstAidKit size={22} weight="bold" /> Pedir desculpa</button>}
-          {canChange && cmp(day.date, today) >= 0 && (
+          {((canChange && cmp(day.date, today) >= 0) || ((st === 'recover' || st === 'missed') && !monthClosed)) && (
             <div className="stack-sm">
               <button className="btn danger block" disabled={!unmark.ok} aria-describedby={unmark.ok ? undefined : 'unmark-why'} onClick={() => run(() => api.removePlannedDay(day.id), 'Dia eliminado').then(close)}><Trash size={20} weight="bold" /> Eliminar este dia</button>
               {!unmark.ok && <p id="unmark-why" className="small muted">{unmark.reason}</p>}
