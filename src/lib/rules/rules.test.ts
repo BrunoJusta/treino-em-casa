@@ -141,6 +141,18 @@ describe('planeamento', () => {
     expect(unmarkWarning(a, ctx)).toContain('fica com 1 de 2')
   })
 
+  it('um dia que já passou sem treino elimina-se se a semana ficar com o mínimo', () => {
+    const a = pd('2026-11-16')
+    const b = pd('2026-11-18')
+    const c = pd('2026-11-20')
+    const ctx = { today: '2026-11-23', days: [a, b, c], sessions: [ses('2026-11-16'), ses('2026-11-18')], excuses: [], closedMonths: new Set<string>(), minPerWeek: 2 }
+    expect(canUnmark(c, ctx).ok).toBe(true) // 3.º dia não feito
+    const two = { ...ctx, days: [a, c] }
+    expect(canUnmark(c, two).ok).toBe(false) // ficava só com 1
+    expect(canUnmark(a, ctx).ok).toBe(false) // já tem treino
+    expect(canUnmark(c, { ...ctx, closedMonths: new Set(['a:2026-11']) }).ok).toBe(false)
+  })
+
   it('a data de hoje é calculada em Lisboa', () => {
     expect(todayLisbon(new Date('2026-10-25T23:30:00Z'))).toBe('2026-10-25') // depois da mudança de hora, UTC+0
     expect(todayLisbon(new Date('2026-07-01T23:30:00Z'))).toBe('2026-07-02') // verão, UTC+1

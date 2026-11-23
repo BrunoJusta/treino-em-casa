@@ -27,6 +27,7 @@ Registo das decisões fechadas com o Bruno antes de construir. Quando uma regra 
 - Um dia falhado fica "Por recuperar" só **até ao fim da sua semana** (domingo) e só se muda para um dia dessa semana. Quando a semana acaba conta como falha e já não se muda (a desculpa ainda se pode pedir até o mês fechar). Decidido a 17 de novembro de 2026.
 - O mínimo semanal conta só no planeamento.
 - Só se tira um dia (sem o mudar) se a semana continuar com o mínimo.
+- Só os dias mínimos da semana são obrigatórios: um dia a mais que já passou sem treino (por exemplo, o 3.º da semana) pode ser eliminado pela própria pessoa, desde que a semana fique com o mínimo de dias marcados. Fica no registo. A multa não muda, porque conta os treinos feitos.
 
 ## Registo do treino
 
