@@ -131,18 +131,7 @@ export function Hoje() {
 
       <LiveWalkBanner />
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}>{hero}</motion.div>
-
-      <button className="btn walk-soft big block" onClick={() => setWalkOpen(true)}><PixelIcon name="walk" size={26} /> Registar caminhada</button>
-      <WalkSheet open={walkOpen} onClose={() => setWalkOpen(false)} />
-
-      {pendingExcuses.length > 0 && (
-        <Link to="/admin/desculpas" className="card warn tap row" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <Warning size={26} weight="fill" color="var(--warn)" />
-          <div className="grow"><p className="strong">{pendingExcuses.length === 1 ? 'Tens 1 desculpa para decidir' : `Tens ${pendingExcuses.length} desculpas para decidir`}</p><p className="small muted">Ficam pendentes até decidires.</p></div>
-          <CaretRight size={20} />
-        </Link>
-      )}
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}>{hero}</motion.div>
 
       {risk > 0 && (
         <div className="card danger row">
@@ -152,6 +141,17 @@ export function Hoje() {
             <p className="small" style={{ color: 'var(--ink-2)' }}>{riskText(p.risk, snap.settings)}</p>
           </div>
         </div>
+      )}
+
+      <button className="btn walk-soft block" onClick={() => setWalkOpen(true)}><PixelIcon name="walk" size={22} /> Registar caminhada</button>
+      <WalkSheet open={walkOpen} onClose={() => setWalkOpen(false)} />
+
+      {pendingExcuses.length > 0 && (
+        <Link to="/admin/desculpas" className="card warn tap row" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Warning size={26} weight="fill" color="var(--warn)" />
+          <div className="grow"><p className="strong">{pendingExcuses.length === 1 ? 'Tens 1 desculpa para decidir' : `Tens ${pendingExcuses.length} desculpas para decidir`}</p><p className="small muted">Ficam pendentes até decidires.</p></div>
+          <CaretRight size={20} />
+        </Link>
       )}
 
       {needsPlanning && (

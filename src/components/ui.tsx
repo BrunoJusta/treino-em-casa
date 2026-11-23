@@ -109,7 +109,7 @@ export function Toasts() {
     <div className="toasts" aria-live="polite">
       <AnimatePresence>
         {toasts.map((t) => (
-          <motion.div key={t.id} role={t.tone === 'error' ? 'alert' : 'status'} className={`toast ${t.tone ?? ''}`} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }}>
+          <motion.div key={t.id} role={t.tone === 'error' ? 'alert' : 'status'} className={`toast ${t.tone ?? ''}`} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1, transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] } }} exit={{ y: -12, opacity: 0, transition: { duration: 0.18, ease: [0.23, 1, 0.32, 1] } }}>
             {t.text}
           </motion.div>
         ))}
@@ -137,7 +137,7 @@ export function CelebrationOverlay() {
     <AnimatePresence>
       {celebration && (
         <motion.div className="celebrate" role="dialog" aria-modal="true" aria-labelledby="celebrate-title" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => celebrate(null)}>
-          <motion.div className="celebrate-card" initial={{ scale: 0.8, y: 20 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
+          <motion.div className="celebrate-card" initial={{ scale: 0.9, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
             <JarMascot mood={celebration.kind === 'coin' ? 'wow' : 'party'} level={0.5} size={130} />
             {celebration.kind === 'levelup' && <div className="pixel-frame pixel-type">Nível {celebration.level}</div>}
             <h1 id="celebrate-title">{celebration.title}</h1>

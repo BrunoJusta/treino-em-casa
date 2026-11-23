@@ -105,7 +105,7 @@ h3 { font-size: 17px; font-weight: 650; }
 .card.danger { background: var(--danger-soft); border-color: var(--danger-line); }
 .card.raised { box-shadow: var(--shadow); }
 .card.tap { transition: transform 0.15s var(--ease), background 0.15s; text-align: left; width: 100%; }
-.card.tap:active { transform: scale(0.985); }
+.card.tap:active { transform: scale(0.98); }
 
 /* ---------- Botões ---------- */
 .btn {
@@ -115,7 +115,7 @@ h3 { font-size: 17px; font-weight: 650; }
   transition: transform 0.12s var(--ease), background 0.15s, box-shadow 0.15s;
   user-select: none; -webkit-user-select: none;
 }
-.btn:active { transform: translateY(1px) scale(0.985); }
+.btn:active { transform: translateY(1px) scale(0.97); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 .btn.primary { background: var(--accent); color: var(--accent-ink); box-shadow: inset 0 -3px 0 rgba(11, 58, 77, 0.18); }
 .btn.primary:active { box-shadow: inset 0 -1px 0 rgba(11, 58, 77, 0.18); }
@@ -127,7 +127,7 @@ h3 { font-size: 17px; font-weight: 650; }
 .btn.huge { min-height: 76px; font-size: 21px; border-radius: 22px; }
 .btn.block { width: 100%; }
 .btn.sm { min-height: 38px; padding: 0 12px; font-size: 14.5px; border-radius: 12px; }
-.icon-btn { width: 44px; height: 44px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); display: inline-grid; place-items: center; color: var(--ink); flex-shrink: 0; }
+.icon-btn { transition: transform 0.12s var(--ease); width: 44px; height: 44px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); display: inline-grid; place-items: center; color: var(--ink); flex-shrink: 0; }
 .icon-btn.plain { border-color: transparent; background: transparent; }
 .icon-btn:active { transform: scale(0.95); }
 
@@ -318,8 +318,11 @@ button.cal-day { cursor: pointer; }
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 .pixel-type { font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
 
+/* Menos movimento não é zero: tira deslocações e escalas, mas mantém as mudanças de cor e de opacidade, que ajudam a perceber o que mudou. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  .btn:active, .card.tap:active, .icon-btn:active, .plan-day:active, .walk-choice:active, .shutter:active, .profile-link:active { transform: none; }
+  .bar > i, .switch-knob, .pocket-body { transition-duration: 0.01ms !important; }
 }
 
 @media (min-width: 900px) {
@@ -380,7 +383,8 @@ button.cal-day { cursor: pointer; }
 .chip.walk { background: var(--walk-soft); border-color: var(--walk-line); color: var(--walk-text); }
 .chip.walk-on { background: var(--walk); border-color: var(--walk); color: var(--walk-ink); }
 .walk-choice { display: flex; align-items: center; gap: 14px; text-align: left; padding: 16px; border-radius: 18px; border: 1.5px solid var(--walk-line); background: var(--walk-soft); color: var(--ink); width: 100%; font: inherit; cursor: pointer; }
-.walk-choice:active { transform: scale(0.985); }
+.walk-choice { transition: transform 0.15s var(--ease); }
+.walk-choice:active { transform: scale(0.98); }
 .walk-choice .ico { width: 48px; height: 48px; border-radius: 14px; background: var(--walk); color: var(--walk-ink); display: grid; place-items: center; flex-shrink: 0; }
 .walk-choice b { display: block; font-size: 17px; }
 .walk-choice span { font-size: 14px; color: var(--ink-2); }

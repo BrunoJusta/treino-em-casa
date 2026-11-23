@@ -54,7 +54,7 @@ export function Jarro() {
       <section className="card soft" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, paddingTop: 28, position: 'relative' }}>
         <div style={{ position: 'relative' }}>
           {Array.from({ length: drops }, (_, i) => <FallingCoin key={`${drops}-${i}`} delay={i * 0.25} />)}
-          <JarMascot level={level} mood={drops ? 'wow' : fam.jar.potential === 0 ? 'party' : 'happy'} size={150} label={`O Jarro tem ${euros(fam.jar.balance)}`} />
+          <JarMascot level={level} mood={drops ? 'wow' : fam.jar.potential === 0 ? 'party' : 'happy'} size={112} label={`O Jarro tem ${euros(fam.jar.balance)}`} />
         </div>
         <div className="center">
           <p className="num" style={{ fontSize: 44, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>{euros(fam.jar.balance)}</p>
